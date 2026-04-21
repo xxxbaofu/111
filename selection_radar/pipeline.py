@@ -149,6 +149,18 @@ class SelectionRadarPipeline:
                 }
             )
 
+        # Keep one best row per product name to avoid noisy duplicate outputs.
+        deduped: dict[str, dict] = {}
+        for row in json_rows:
+            existing = deduped.get(row["product"])
+            if existing is None or float(row["total_score"]) > float(existing["total_score"]):
+                deduped[row["product"]] = row
+        json_rows = sorted(
+            deduped.values(),
+            key=lambda item: float(item["total_score"]),
+            reverse=True,
+        )
+
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         json_path = self.settings.output_dir / f"opportunities_{timestamp}.json"
         md_path = self.settings.output_dir / f"opportunities_{timestamp}.md"
