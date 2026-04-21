@@ -68,6 +68,11 @@ CREATE TABLE IF NOT EXISTS scores (
     metrics TEXT NOT NULL,
     FOREIGN KEY(product_id) REFERENCES products(id)
 );
+
+CREATE TABLE IF NOT EXISTS product_aliases (
+    normalized_name TEXT PRIMARY KEY,
+    display_name_cn TEXT NOT NULL
+);
 """
 
 
@@ -207,6 +212,25 @@ class Database:
                 ),
             )
 
+    def upsert_product_aliases(self, aliases: dict[str, str]) -> None:
+        if not aliases:
+            return
+        query = """
+        INSERT INTO product_aliases (normalized_name, display_name_cn)
+        VALUES (?, ?)
+        ON CONFLICT(normalized_name) DO UPDATE SET
+            display_name_cn=excluded.display_name_cn
+        """
+        with self._connect() as conn:
+            for normalized_name, display_name_cn in aliases.items():
+                conn.execute(query, (normalized_name, display_name_cn))
+
+    def fetch_product_aliases(self) -> dict[str, str]:
+        query = "SELECT normalized_name, display_name_cn FROM product_aliases"
+        with self._connect() as conn:
+            rows = conn.execute(query).fetchall()
+        return {str(row["normalized_name"]): str(row["display_name_cn"]) for row in rows}
+
     def fetch_raw_posts_without_products(self) -> list[PersistedRawPost]:
         query = """
         SELECT rp.*
@@ -274,9 +298,11 @@ class Database:
     def fetch_joined_results(self) -> list[sqlite3.Row]:
         query = """
         SELECT
+            p.id AS product_id,
             p.name AS product_name,
             p.category,
             p.emotion_tag,
+            rp.platform,
             s.trend_score,
             s.profit_score,
             s.competition_score,
@@ -290,6 +316,7 @@ class Database:
             s.metrics
         FROM scores s
         JOIN products p ON p.id = s.product_id
+        JOIN raw_posts rp ON rp.id = p.raw_post_id
         ORDER BY s.total_score DESC
         """
         with self._connect() as conn:

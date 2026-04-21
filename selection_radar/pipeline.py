@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
 
 from selection_radar.ai.extractor import ProductExtractor
 from selection_radar.classifier import OpportunityClassifier
@@ -17,6 +16,11 @@ from selection_radar.collectors.x_trends import XTrendsCollector
 from selection_radar.config import Settings
 from selection_radar.database import Database
 from selection_radar.models import MarketData, Product
+from selection_radar.normalization import (
+    normalize_product_name,
+    to_chinese_display_name,
+    to_english_display_name,
+)
 from selection_radar.output import render_grouped_markdown
 from selection_radar.scoring import ScoringEngine
 
@@ -67,16 +71,20 @@ class SelectionRadarPipeline:
         if not pending_posts:
             return 0
         products: list[Product] = []
+        aliases: dict[str, str] = {}
         for post in pending_posts:
             candidates = self.extractor.extract_from_text(
                 title=post.title,
                 content=post.content,
             )
             for candidate in candidates:
+                normalized_name = normalize_product_name(candidate.name)
+                display_name_cn = to_chinese_display_name(candidate.name)
+                aliases[normalized_name] = display_name_cn
                 products.append(
                     Product(
                         raw_post_id=post.id,
-                        name=candidate.name,
+                        name=normalized_name,
                         category=candidate.category,
                         keywords=candidate.keywords,
                         emotion_tag=candidate.emotion_tag,
@@ -84,6 +92,7 @@ class SelectionRadarPipeline:
                 )
         if products:
             self.db.insert_products(products)
+            self.db.upsert_product_aliases(aliases)
         LOGGER.info("Extracted %s products", len(products))
         return len(products)
 
@@ -120,7 +129,12 @@ class SelectionRadarPipeline:
                 trend_ratio=(trend_signal.last3_vs_prev_ratio if trend_signal else 1.0),
             )
             classification = self.classifier.classify(score, product.emotion_tag)
-            result = self.classifier.to_result(score, classification)
+            result = self.classifier.to_result(
+                score=score,
+                opportunity_type=classification,
+                emotion_tag=product.emotion_tag,
+                category=product.category,
+            )
             self.db.upsert_score(product.id, score, result)
             upserts += 1
         LOGGER.info("Scored %s products", upserts)
@@ -128,38 +142,79 @@ class SelectionRadarPipeline:
 
     def write_outputs(self) -> None:
         rows = self.db.fetch_joined_results()
-        json_rows = []
+        aliases = self.db.fetch_product_aliases()
+        aggregated: dict[str, dict] = {}
         for row in rows:
-            json_rows.append(
-                {
-                    "product": row["product_name"],
+            product_key_name = str(row["product_name"])
+            product_en = to_english_display_name(product_key_name)
+            product_key = normalize_product_name(product_en)
+            display_cn = aliases.get(product_key, to_chinese_display_name(product_en))
+            metrics = json.loads(row["metrics"])
+            entry = aggregated.get(product_key)
+            if entry is None:
+                entry = {
+                    "product_key": product_key,
+                    "product_en": product_en,
+                    "product_cn": display_cn,
+                    "product_display": f"{display_cn}（{product_en}）",
                     "category": row["category"],
                     "emotion_tag": bool(row["emotion_tag"]),
-                    "trend_score": row["trend_score"],
-                    "profit_score": row["profit_score"],
-                    "competition_score": row["competition_score"],
-                    "emotion_score": row["emotion_score"],
-                    "new_trend_score": row["new_trend_score"],
-                    "total_score": row["total_score"],
+                    "trend_score": float(row["trend_score"]),
+                    "profit_score": float(row["profit_score"]),
+                    "competition_score": float(row["competition_score"]),
+                    "emotion_score": float(row["emotion_score"]),
+                    "new_trend_score": float(row["new_trend_score"]),
+                    "total_score": float(row["total_score"]),
                     "classification": row["classification"],
                     "verdict": row["verdict"],
                     "reason": row["reason"],
                     "tags": json.loads(row["tags"]),
-                    "metrics": json.loads(row["metrics"]),
+                    "metrics": metrics,
+                    "labels": metrics.get("labels", []),
+                    "strategy": metrics.get("strategy", ""),
+                    "estimated_daily_revenue": float(metrics.get("estimated_daily_revenue", 0.0)),
+                    "revenue_level": metrics.get("revenue_level", "低"),
+                    "test_cost": float(metrics.get("test_cost", 0.0)),
+                    "daily_budget": float(metrics.get("daily_budget", 0.0)),
+                    "scale_cost": float(metrics.get("scale_cost", 0.0)),
+                    "playbook": metrics.get("playbook", "低价冲量打法"),
+                    "decision_summary": metrics.get("decision_summary", ""),
+                    "decision_why": metrics.get("decision_why", ""),
+                    "decision_how": metrics.get("decision_how", ""),
+                    "decision_ads": metrics.get("decision_ads", ""),
+                    "source_platforms": [],
+                    "source_count": 0,
                 }
-            )
+                aggregated[product_key] = entry
+            if row["platform"] not in entry["source_platforms"]:
+                entry["source_platforms"].append(row["platform"])
+            entry["source_count"] = len(entry["source_platforms"])
+            if float(row["total_score"]) > float(entry["total_score"]):
+                entry["trend_score"] = float(row["trend_score"])
+                entry["profit_score"] = float(row["profit_score"])
+                entry["competition_score"] = float(row["competition_score"])
+                entry["emotion_score"] = float(row["emotion_score"])
+                entry["new_trend_score"] = float(row["new_trend_score"])
+                entry["total_score"] = float(row["total_score"])
+                entry["classification"] = row["classification"]
+                entry["verdict"] = row["verdict"]
+                entry["reason"] = row["reason"]
+                entry["tags"] = json.loads(row["tags"])
+                entry["metrics"] = metrics
+                entry["labels"] = metrics.get("labels", [])
+                entry["strategy"] = metrics.get("strategy", "")
+                entry["estimated_daily_revenue"] = float(metrics.get("estimated_daily_revenue", 0.0))
+                entry["revenue_level"] = metrics.get("revenue_level", "低")
+                entry["test_cost"] = float(metrics.get("test_cost", 0.0))
+                entry["daily_budget"] = float(metrics.get("daily_budget", 0.0))
+                entry["scale_cost"] = float(metrics.get("scale_cost", 0.0))
+                entry["playbook"] = metrics.get("playbook", "低价冲量打法")
+                entry["decision_summary"] = metrics.get("decision_summary", "")
+                entry["decision_why"] = metrics.get("decision_why", "")
+                entry["decision_how"] = metrics.get("decision_how", "")
+                entry["decision_ads"] = metrics.get("decision_ads", "")
 
-        # Keep one best row per product name to avoid noisy duplicate outputs.
-        deduped: dict[str, dict] = {}
-        for row in json_rows:
-            existing = deduped.get(row["product"])
-            if existing is None or float(row["total_score"]) > float(existing["total_score"]):
-                deduped[row["product"]] = row
-        json_rows = sorted(
-            deduped.values(),
-            key=lambda item: float(item["total_score"]),
-            reverse=True,
-        )
+        json_rows = sorted(aggregated.values(), key=lambda item: float(item["total_score"]), reverse=True)
 
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         json_path = self.settings.output_dir / f"opportunities_{timestamp}.json"

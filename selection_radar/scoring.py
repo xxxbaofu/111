@@ -8,7 +8,7 @@ from selection_radar.models import MarketData, ScoreBreakdown
 
 
 class ScoringEngine:
-    """Compute score components according to MVP rules."""
+    """Compute score components with normalized total (0-100)."""
 
     def score(
         self,
@@ -24,7 +24,13 @@ class ScoringEngine:
         competition_score = self._competition_score(market_rows)
         emotion_score = self._emotion_score(emotion_tag)
         new_trend_score = self._new_trend_score(trend_ratio)
-        total = trend_score + profit_score + competition_score + emotion_score + new_trend_score
+        total = self.total_from_components(
+            trend_score=trend_score,
+            profit_score=profit_score,
+            competition_score=competition_score,
+            emotion_score=emotion_score,
+            new_trend_score=new_trend_score,
+        )
         return ScoreBreakdown(
             trend_score=round(trend_score, 2),
             profit_score=round(profit_score, 2),
@@ -32,6 +38,25 @@ class ScoringEngine:
             emotion_score=round(emotion_score, 2),
             new_trend_score=round(new_trend_score, 2),
             total_score=round(total, 2),
+        )
+
+    @staticmethod
+    def total_from_components(
+        *,
+        trend_score: float,
+        profit_score: float,
+        competition_score: float,
+        emotion_score: float,
+        new_trend_score: float,
+    ) -> float:
+        # Sub-scores stay in 0-10. Weighted total is normalized to 0-100.
+        # Weights: trend25 + profit20 + competition20 + emotion15 + newtrend20.
+        return (
+            trend_score * 2.5
+            + profit_score * 2.0
+            + competition_score * 2.0
+            + emotion_score * 1.5
+            + new_trend_score * 2.0
         )
 
     @staticmethod
@@ -62,7 +87,7 @@ class ScoringEngine:
 
     @staticmethod
     def _emotion_score(emotion_tag: bool) -> float:
-        return 4.0 if emotion_tag else 0.0
+        return 8.0 if emotion_tag else 1.0
 
     @staticmethod
     def _new_trend_score(trend_ratio: float) -> float:

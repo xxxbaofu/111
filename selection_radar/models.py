@@ -69,7 +69,7 @@ class OpportunityResult:
     tags: list[str]
     verdict: str
     reason: str
-    metrics: dict[str, float]
+    metrics: dict[str, Any]
     raw: dict[str, Any] = field(default_factory=dict)
 
 
