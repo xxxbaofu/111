@@ -25,6 +25,8 @@ class Settings:
     reddit_subreddits: tuple[str, ...]
     amazon_base_url: str
     etsy_base_url: str
+    request_timeout_seconds: int
+    max_collect_per_source: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -65,6 +67,8 @@ class Settings:
             etsy_base_url=os.getenv(
                 "SELECTION_RADAR_ETSY_BASE_URL", "https://www.etsy.com"
             ),
+            request_timeout_seconds=int(os.getenv("SELECTION_RADAR_REQUEST_TIMEOUT", "25")),
+            max_collect_per_source=int(os.getenv("SELECTION_RADAR_MAX_COLLECT_PER_SOURCE", "20")),
         )
 
 

@@ -15,10 +15,14 @@ class TikTokCollector(BaseCollector):
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
 
-    def collect(self, limit: int = 20) -> list[RawPost]:
+    def collect(self, limit: int | None = None) -> list[RawPost]:
+        limit = limit or self.settings.max_collect_per_source
         if self.settings.demo_mode or not self.settings.apify_token:
             return self._demo_posts()
-        return self._collect_from_apify(limit=limit)
+        try:
+            return self._collect_from_apify(limit=limit)
+        except requests.RequestException:
+            return self._demo_posts()
 
     def _collect_from_apify(self, limit: int) -> list[RawPost]:
         run_url = (
@@ -29,7 +33,12 @@ class TikTokCollector(BaseCollector):
             "searchQueries": list(self.settings.tiktok_keywords),
             "resultsPerPage": min(limit, 50),
         }
-        response = requests.post(run_url, params=params, json=payload, timeout=60)
+        response = requests.post(
+            run_url,
+            params=params,
+            json=payload,
+            timeout=self.settings.request_timeout_seconds,
+        )
         response.raise_for_status()
         items = response.json()
         posts: list[RawPost] = []

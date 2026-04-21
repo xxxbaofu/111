@@ -20,10 +20,14 @@ class RedditCollector(BaseCollector):
         if self.settings.demo_mode:
             return self._demo_posts()
 
-        token = self._get_token()
-        if not token:
-            return []
-        return self._collect_with_token(token)
+        try:
+            token = self._get_token()
+            if not token:
+                return self._demo_posts()
+            posts = self._collect_with_token(token)
+            return posts or self._demo_posts()
+        except requests.RequestException:
+            return self._demo_posts()
 
     def _get_token(self) -> str | None:
         if not self.settings.reddit_client_id or not self.settings.reddit_client_secret:
@@ -33,7 +37,7 @@ class RedditCollector(BaseCollector):
             data={"grant_type": "client_credentials"},
             auth=(self.settings.reddit_client_id, self.settings.reddit_client_secret),
             headers={"User-Agent": self.settings.reddit_user_agent},
-            timeout=20,
+            timeout=self.settings.request_timeout_seconds,
         )
         resp.raise_for_status()
         return resp.json().get("access_token")
@@ -48,9 +52,9 @@ class RedditCollector(BaseCollector):
             url = f"https://oauth.reddit.com/r/{subreddit}/hot"
             response = requests.get(
                 url,
-                params={"limit": 25},
+                params={"limit": self.settings.max_collect_per_source},
                 headers=headers,
-                timeout=20,
+                timeout=self.settings.request_timeout_seconds,
             )
             if response.status_code != 200:
                 continue
