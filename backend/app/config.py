@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     postgres_db: str = "dataos"
     postgres_host: str = "postgres"
     postgres_port: int = 5432
+    database_url: str | None = None
 
     redis_url: str = "redis://redis:6379/0"
     celery_broker_url: str = "redis://redis:6379/1"
@@ -33,7 +34,9 @@ class Settings(BaseSettings):
     )
 
     @property
-    def database_url(self) -> str:
+    def resolved_database_url(self) -> str:
+        if self.database_url:
+            return self.database_url
         return (
             f"postgresql+psycopg2://{self.postgres_user}:{self.postgres_password}"
             f"@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
