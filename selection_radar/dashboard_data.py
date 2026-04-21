@@ -43,6 +43,7 @@ def build_dashboard_frames(db: Database) -> tuple[pd.DataFrame, pd.DataFrame]:
         tags = json.loads(row["tags"])
         trend_score = float(row["trend_score"])
         competition_score = float(row["competition_score"])
+        profit_score = float(row["profit_score"])
         total_score = float(row["total_score"])
         discussion_index = float(
             ((trend_score + competition_score + float(row["new_trend_score"])) / 3.0) * 10.0
@@ -62,6 +63,8 @@ def build_dashboard_frames(db: Database) -> tuple[pd.DataFrame, pd.DataFrame]:
                 "热度分": trend_score,
                 "讨论度": score_to_level(discussion_index / 10, high=7.2, mid=4.8),
                 "讨论度分": discussion_index,
+                "竞争分": competition_score,
+                "利润分": profit_score,
                 "平均价格": round(float(row["profit_score"]) * 6.0 + 18.0, 2),
                 "预估测试预算": float(metrics.get("test_cost", 0.0)),
                 "一句话结论": str(metrics.get("decision_summary", row["reason"])),
@@ -117,6 +120,8 @@ def build_dashboard_frames(db: Database) -> tuple[pd.DataFrame, pd.DataFrame]:
             current["热度"] = score_to_level(trend_score, high=7.5, mid=5.0)
             current["讨论度分"] = discussion_index
             current["讨论度"] = score_to_level(discussion_index / 10, high=7.2, mid=4.8)
+            current["竞争分"] = competition_score
+            current["利润分"] = profit_score
             current["一句话结论"] = str(metrics.get("decision_summary", row["reason"]))
             current["为什么"] = str(metrics.get("decision_why", row["reason"]))
             current["怎么做"] = str(metrics.get("decision_how", ""))

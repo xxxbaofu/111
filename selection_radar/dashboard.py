@@ -161,6 +161,14 @@ def _category_radar_page(products_df: pd.DataFrame, categories_df: pd.DataFrame,
     if beginner_only:
         filt = filt[filt["新手友好"] == "是"]
 
+    # 兼容旧数据列，避免字段缺失导致 KeyError
+    if "竞争分" not in filt.columns:
+        filt = filt.copy()
+        if "竞争度" in filt.columns:
+            filt["竞争分"] = pd.to_numeric(filt["竞争度"], errors="coerce").fillna(0.0)
+        else:
+            filt["竞争分"] = 0.0
+
     cat_view = (
         filt.groupby("品类中文")
         .agg(
