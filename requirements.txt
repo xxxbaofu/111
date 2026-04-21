@@ -1,0 +1,7 @@
+openai
+requests
+pytrends
+apscheduler
+pytest
+streamlit
+pandas
