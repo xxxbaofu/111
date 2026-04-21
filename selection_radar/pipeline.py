@@ -222,6 +222,82 @@ class SelectionRadarPipeline:
         json_path.write_text(json.dumps(json_rows, ensure_ascii=False, indent=2), encoding="utf-8")
         md_path.write_text(render_grouped_markdown(json_rows), encoding="utf-8")
 
+    def load_aggregated_results(self) -> list[dict]:
+        """Load product-level merged rows for dashboard and API-like consumers."""
+        rows = self.db.fetch_joined_results()
+        aliases = self.db.fetch_product_aliases()
+        aggregated: dict[str, dict] = {}
+        for row in rows:
+            product_key_name = str(row["product_name"])
+            product_en = to_english_display_name(product_key_name)
+            product_key = normalize_product_name(product_en)
+            display_cn = aliases.get(product_key, to_chinese_display_name(product_en))
+            metrics = json.loads(row["metrics"])
+            entry = aggregated.get(product_key)
+            if entry is None:
+                entry = {
+                    "product_key": product_key,
+                    "product_en": product_en,
+                    "product_cn": display_cn,
+                    "product_display": f"{display_cn}（{product_en}）",
+                    "category": row["category"],
+                    "emotion_tag": bool(row["emotion_tag"]),
+                    "trend_score": float(row["trend_score"]),
+                    "profit_score": float(row["profit_score"]),
+                    "competition_score": float(row["competition_score"]),
+                    "emotion_score": float(row["emotion_score"]),
+                    "new_trend_score": float(row["new_trend_score"]),
+                    "total_score": float(row["total_score"]),
+                    "classification": row["classification"],
+                    "verdict": row["verdict"],
+                    "reason": row["reason"],
+                    "tags": json.loads(row["tags"]),
+                    "metrics": metrics,
+                    "labels": metrics.get("labels", []),
+                    "strategy": metrics.get("strategy", ""),
+                    "estimated_daily_revenue": float(metrics.get("estimated_daily_revenue", 0.0)),
+                    "revenue_level": metrics.get("revenue_level", "低"),
+                    "test_cost": float(metrics.get("test_cost", 0.0)),
+                    "daily_budget": float(metrics.get("daily_budget", 0.0)),
+                    "scale_cost": float(metrics.get("scale_cost", 0.0)),
+                    "playbook": metrics.get("playbook", "低价冲量打法"),
+                    "decision_summary": metrics.get("decision_summary", ""),
+                    "decision_why": metrics.get("decision_why", ""),
+                    "decision_how": metrics.get("decision_how", ""),
+                    "decision_ads": metrics.get("decision_ads", ""),
+                    "source_platforms": [],
+                    "source_count": 0,
+                }
+                aggregated[product_key] = entry
+            if row["platform"] not in entry["source_platforms"]:
+                entry["source_platforms"].append(row["platform"])
+            entry["source_count"] = len(entry["source_platforms"])
+            if float(row["total_score"]) > float(entry["total_score"]):
+                entry["trend_score"] = float(row["trend_score"])
+                entry["profit_score"] = float(row["profit_score"])
+                entry["competition_score"] = float(row["competition_score"])
+                entry["emotion_score"] = float(row["emotion_score"])
+                entry["new_trend_score"] = float(row["new_trend_score"])
+                entry["total_score"] = float(row["total_score"])
+                entry["classification"] = row["classification"]
+                entry["verdict"] = row["verdict"]
+                entry["reason"] = row["reason"]
+                entry["tags"] = json.loads(row["tags"])
+                entry["metrics"] = metrics
+                entry["labels"] = metrics.get("labels", [])
+                entry["strategy"] = metrics.get("strategy", "")
+                entry["estimated_daily_revenue"] = float(metrics.get("estimated_daily_revenue", 0.0))
+                entry["revenue_level"] = metrics.get("revenue_level", "低")
+                entry["test_cost"] = float(metrics.get("test_cost", 0.0))
+                entry["daily_budget"] = float(metrics.get("daily_budget", 0.0))
+                entry["scale_cost"] = float(metrics.get("scale_cost", 0.0))
+                entry["playbook"] = metrics.get("playbook", "低价冲量打法")
+                entry["decision_summary"] = metrics.get("decision_summary", "")
+                entry["decision_why"] = metrics.get("decision_why", "")
+                entry["decision_how"] = metrics.get("decision_how", "")
+                entry["decision_ads"] = metrics.get("decision_ads", "")
+        return sorted(aggregated.values(), key=lambda item: float(item["total_score"]), reverse=True)
+
     @staticmethod
     def _calc_social_growth_ratio(post) -> float:
         # Simplified growth proxy using engagement density in MVP.
