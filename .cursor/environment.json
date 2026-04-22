@@ -1,0 +1,15 @@
+{
+  "$schema": "https://www.cursor.com/schemas/environment.schema.json",
+  "name": "python-wig-ai-studio",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "python3 wig_app.py"
+    }
+  ]
+}
