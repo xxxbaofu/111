@@ -54,11 +54,16 @@
       <section class="row g-4 align-items-stretch mb-4">
         <div class="col-lg-6">
           <div class="hero-card h-100 p-4 rounded-4">
-            <p class="text-uppercase small fw-semibold text-info mb-2">AI + 3D + 试戴出图</p>
-            <h1 class="display-6 fw-bold mb-3">更清晰、更快决策的假发独立站体验</h1>
-            <p class="text-secondary-emphasis mb-4">
-              通过头像洞察、头围匹配、场景化推荐和 AI 试戴图片生成，帮助用户快速选到适合自己的日常与 cosplay 假发。
+            <span class="badge rounded-pill text-bg-info-subtle text-info-emphasis mb-3">AI + 3D + 试戴出图</span>
+            <h1 class="display-6 fw-bold mb-3">30秒找到真正适合你的假发</h1>
+            <p class="text-secondary-emphasis mb-3">
+              上传头像后，系统会根据脸型、头围与场景需求给出可解释推荐，并自动生成试戴图，帮助你更快做决定。
             </p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <span class="badge rounded-pill text-bg-light">头围精准匹配</span>
+              <span class="badge rounded-pill text-bg-light">Cosplay角色适配</span>
+              <span class="badge rounded-pill text-bg-light">支持真实AI出图</span>
+            </div>
             <div class="d-flex flex-wrap gap-2 mb-4">
               <a class="btn btn-primary" href="#ai-stylist">开始智能选款</a>
               <a class="btn btn-outline-light" href="#tryon-lab">去试戴出图</a>
@@ -93,6 +98,45 @@
                 <span class="small">3D Wig Preview</span>
                 <button id="switchWigColorBtn" class="btn btn-sm btn-outline-light">切换发色</button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+          <div class="card h-100 border-secondary-subtle">
+            <div class="card-body p-3">
+              <div class="small text-uppercase text-muted mb-1">Step 1</div>
+              <h3 class="h6 mb-1">上传头像</h3>
+              <p class="small text-muted mb-0">AI识别脸型与肤色倾向，给出发色建议。</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card h-100 border-secondary-subtle">
+            <div class="card-body p-3">
+              <div class="small text-uppercase text-muted mb-1">Step 2</div>
+              <h3 class="h6 mb-1">填写头围偏好</h3>
+              <p class="small text-muted mb-0">结合预算、场景、风格做可解释打分。</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card h-100 border-secondary-subtle">
+            <div class="card-body p-3">
+              <div class="small text-uppercase text-muted mb-1">Step 3</div>
+              <h3 class="h6 mb-1">一键试戴出图</h3>
+              <p class="small text-muted mb-0">快速生成多场景试戴图用于比对。</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="card h-100 border-secondary-subtle">
+            <div class="card-body p-3">
+              <div class="small text-uppercase text-muted mb-1">Step 4</div>
+              <h3 class="h6 mb-1">加入购物车</h3>
+              <p class="small text-muted mb-0">支持优惠码与运费预估，决策更放心。</p>
             </div>
           </div>
         </div>
@@ -306,6 +350,34 @@
           <div id="tryonWarnings" class="small text-warning mb-2"></div>
           <div id="tryonIntegrationTips" class="small text-muted mb-3"></div>
           <div id="tryonGallery" class="tryon-gallery"></div>
+        </div>
+      </section>
+
+      <section class="card bg-body-tertiary border-secondary-subtle mb-4">
+        <div class="card-body">
+          <div class="row g-3 align-items-center">
+            <div class="col-lg-7">
+              <h2 class="h4 mb-2">为什么这套流程更适合独立站转化</h2>
+              <p class="text-muted mb-2">
+                把“挑款难”拆成可视化步骤：先理解你，再推荐你，最后用试戴图帮助你确认。相比传统图文详情页，用户决策时间更短、加购更明确。
+              </p>
+              <ul class="small text-muted mb-0">
+                <li>减少用户在列表页盲选的成本</li>
+                <li>用可解释推荐提升信任感与下单信心</li>
+                <li>试戴图可直接用于社媒分享和二次传播</li>
+              </ul>
+            </div>
+            <div class="col-lg-5">
+              <div class="p-3 rounded-3 border border-secondary-subtle bg-dark-subtle">
+                <div class="small text-uppercase text-muted mb-2">Landing Page CTA</div>
+                <h3 class="h5">准备好试试你的第一款 AI 假发了吗？</h3>
+                <div class="d-grid gap-2 mt-3">
+                  <a href="#ai-stylist" class="btn btn-primary">立即开始智能选款</a>
+                  <a href="#tryon-lab" class="btn btn-outline-secondary">先看试戴出图效果</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -11,11 +11,47 @@
   letter-spacing: 0.02em;
 }
 
+.top-banner {
+  background: linear-gradient(90deg, #452a82, #7b42d8);
+  color: #efe6ff;
+  font-size: 0.86rem;
+}
+
+.navbar {
+  background: rgba(23, 16, 44, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.hero-card {
+  background: linear-gradient(165deg, #201241, #120d24);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(8, 6, 17, 0.32);
+}
+
+.hero-card .badge {
+  letter-spacing: 0.03em;
+}
+
 .hero-canvas {
   min-height: 360px;
   width: 100%;
   border-radius: 1rem;
   background: radial-gradient(circle at 20% 20%, #6f42c1, #2d1b59);
+}
+
+.hero-visual {
+  background: radial-gradient(circle at 30% 15%, #3b2770, #17102f);
+  min-height: 360px;
+}
+
+.metric-box {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.glass-bar {
+  background: rgba(13, 9, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .metric-card {
@@ -51,6 +87,18 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1rem;
+}
+
+.card {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+#shop .card-body,
+#ai-stylist .card-body,
+#tryon-lab .card-body,
+#reviews .card-body,
+#newsletter .card-body {
+  padding: 1.3rem;
 }
 
 .product-card {
@@ -178,6 +226,58 @@
   right: 1rem;
   bottom: 1rem;
   z-index: 1080;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.9rem;
+}
+
+.cards > div {
+  grid-column: span 12;
+}
+
+@media (min-width: 768px) {
+  .cards > div {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1200px) {
+  .cards > div {
+    grid-column: span 4;
+  }
+}
+
+.tryon-gallery {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.9rem;
+}
+
+.tryon-gallery > div {
+  grid-column: span 12;
+}
+
+@media (min-width: 768px) {
+  .tryon-gallery > div {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1200px) {
+  .tryon-gallery > div {
+    grid-column: span 4;
+  }
+}
+
+.avatar-preview {
+  width: 92px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 1px solid var(--bs-border-color);
 }
 
 .toast-custom {
