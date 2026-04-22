@@ -4,6 +4,8 @@ const state = {
   recommendations: [],
   selectedProductIds: [],
   wigColorIndex: 0,
+  cart: [],
+  reviewItems: [],
 };
 
 const wigColors = [0xd266ff, 0x7e7cff, 0xff69a6, 0x9ad0ff];
@@ -21,6 +23,24 @@ const dom = {
   recommendations: document.getElementById("recommendations"),
   switchWigColorBtn: document.getElementById("switchWigColorBtn"),
   bookBtn: document.getElementById("bookBtn"),
+  cartToggleBtn: document.getElementById("cartToggleBtn"),
+  cartBadge: document.getElementById("cartBadge"),
+  cartPanel: document.getElementById("cartPanel"),
+  cartItems: document.getElementById("cartItems"),
+  checkoutPreviewBtn: document.getElementById("checkoutPreviewBtn"),
+  checkoutSummary: document.getElementById("checkoutSummary"),
+  discountCodeInput: document.getElementById("discountCodeInput"),
+  shippingMethodSelect: document.getElementById("shippingMethodSelect"),
+  searchInput: document.getElementById("searchInput"),
+  categoryFilter: document.getElementById("categoryFilter"),
+  sceneFilter: document.getElementById("sceneFilter"),
+  sortSelect: document.getElementById("sortSelect"),
+  resetFilterBtn: document.getElementById("resetFilterBtn"),
+  reviewList: document.getElementById("reviewList"),
+  newsletterForm: document.getElementById("newsletterForm"),
+  newsletterEmail: document.getElementById("newsletterEmail"),
+  newsletterPreference: document.getElementById("newsletterPreference"),
+  newsletterMessage: document.getElementById("newsletterMessage"),
 };
 
 function splitInput(value) {
@@ -28,6 +48,10 @@ function splitInput(value) {
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
+}
+
+function formatCny(value) {
+  return `¥${Number(value || 0).toFixed(0)}`;
 }
 
 function formToPayload(form) {
@@ -56,6 +80,37 @@ function readFileAsBase64(file) {
   });
 }
 
+function currentDisplayItems() {
+  const source = state.recommendations.length ? state.recommendations : state.catalog;
+  const keyword = String(dom.searchInput.value || "")
+    .trim()
+    .toLowerCase();
+  const category = String(dom.categoryFilter.value || "").toLowerCase();
+  const scene = String(dom.sceneFilter.value || "").toLowerCase();
+  const sort = String(dom.sortSelect.value || "recommended");
+
+  let items = source.filter((item) => {
+    const name = String(item.name || "").toLowerCase();
+    const style = String(item.style || "").toLowerCase();
+    const color = String(item.colorFamily || item.baseColor || "").toLowerCase();
+    const categoryMatch = !category || String(item.category || "").toLowerCase() === category;
+    const sceneMatch = !scene || (item.scenes || []).map((x) => String(x).toLowerCase()).includes(scene);
+    const keywordMatch = !keyword || name.includes(keyword) || style.includes(keyword) || color.includes(keyword);
+    return categoryMatch && sceneMatch && keywordMatch;
+  });
+
+  if (sort === "price-asc") {
+    items.sort((a, b) => Number(a.priceCny || 0) - Number(b.priceCny || 0));
+  } else if (sort === "price-desc") {
+    items.sort((a, b) => Number(b.priceCny || 0) - Number(a.priceCny || 0));
+  } else if (sort === "rating-desc") {
+    items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+  } else if (state.recommendations.length) {
+    items.sort((a, b) => Number(b.matchScore || 0) - Number(a.matchScore || 0));
+  }
+  return items;
+}
+
 async function loadCatalog() {
   const response = await fetch("/api/catalog");
   const data = await response.json();
@@ -65,16 +120,27 @@ async function loadCatalog() {
   dom.metricRating.textContent = summary.avg_rating ?? "--";
   const cosplayRatio = Number(summary.cosplay_ratio || 0);
   dom.metricCosplay.textContent = `${Math.round(cosplayRatio * 100)}%`;
-  renderCatalogCards(state.catalog, true);
+  renderCatalogCards(currentDisplayItems(), true);
+}
+
+async function loadReviews() {
+  const response = await fetch("/api/reviews?limit=6");
+  const data = await response.json();
+  state.reviewItems = data.items || [];
+  renderReviews();
 }
 
 function renderCatalogCards(items, generic = false) {
+  if (!items.length) {
+    dom.recommendations.innerHTML = `<p class="empty-tip">暂无匹配商品，请调整筛选条件。</p>`;
+    return;
+  }
   const cards = items.map((item) => {
     const reasons = generic
       ? ["可用于 AI 试戴流程。", `适用场景：${(item.scenes || []).join(" / ")}`]
       : item.aiReasons || [];
     const scoreBlock = generic
-      ? `<div class="score">¥${item.priceCny}</div>`
+      ? `<div class="score">${formatCny(item.priceCny)}</div>`
       : `<div class="score">${item.matchScore}<small>/100 AI匹配</small></div>`;
     const scoreRows = generic
       ? ""
@@ -83,10 +149,11 @@ function renderCatalogCards(items, generic = false) {
         <div class="score-box"><small>头围</small><strong>${item.fitScore}</strong></div>
         <div class="score-box"><small>风格</small><strong>${item.styleScore}</strong></div>
         <div class="score-box"><small>场景</small><strong>${item.sceneScore}</strong></div>
-        <div class="score-box"><small>价格</small><strong>¥${item.priceCny}</strong></div>
+        <div class="score-box"><small>价格</small><strong>${formatCny(item.priceCny)}</strong></div>
       </div>`;
     const tagCos = item.cosplay ? `<span class="pill">cosplay</span>` : "";
 
+    const productId = item.productId || "";
     return `
       <article class="card">
         <h3>${item.name}</h3>
@@ -101,6 +168,14 @@ function renderCatalogCards(items, generic = false) {
         <ul class="reasons">
           ${reasons.map((text) => `<li>${text}</li>`).join("")}
         </ul>
+        <div class="card-actions">
+          <button class="btn btn-secondary" data-action="quick-view" data-id="${productId}">
+            查看详情
+          </button>
+          <button class="btn btn-primary" data-action="add-cart" data-id="${productId}">
+            加入购物车
+          </button>
+        </div>
       </article>
     `;
   });
@@ -137,6 +212,120 @@ function renderTryonPlans(plans) {
     .join("");
 }
 
+function renderReviews() {
+  if (!state.reviewItems.length) {
+    dom.reviewList.innerHTML = `<p class="empty-tip">暂无评价数据。</p>`;
+    return;
+  }
+  dom.reviewList.innerHTML = state.reviewItems
+    .map(
+      (item) => `
+      <article class="review-card">
+        <div class="review-head">
+          <strong>${item.userName}</strong>
+          <span>${"★".repeat(item.rating)}${"☆".repeat(5 - item.rating)}</span>
+        </div>
+        <h4>${item.title}</h4>
+        <p>${item.content}</p>
+        <div class="review-meta">
+          <span>${item.scene}</span>
+          <span>${item.productId}</span>
+          <span>${item.createdAt}</span>
+        </div>
+      </article>
+    `
+    )
+    .join("");
+}
+
+function updateCartBadge() {
+  const count = state.cart.reduce((sum, row) => sum + row.quantity, 0);
+  dom.cartBadge.textContent = String(count);
+}
+
+function findCatalogById(productId) {
+  const id = String(productId || "").toLowerCase();
+  return state.catalog.find((item) => String(item.productId || "").toLowerCase() === id);
+}
+
+function addToCart(productId) {
+  const product = findCatalogById(productId);
+  if (!product) return;
+    const existing = state.cart.find((row) => row.productId === product.productId);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    state.cart.push({
+      productId: product.productId,
+      name: product.name,
+      priceCny: product.priceCny,
+      quantity: 1,
+    });
+  }
+  renderCartItems();
+}
+
+function changeCartQuantity(productId, delta) {
+  const row = state.cart.find((item) => item.productId === productId);
+  if (!row) return;
+  row.quantity += delta;
+  if (row.quantity <= 0) {
+    state.cart = state.cart.filter((item) => item.productId !== productId);
+  }
+  renderCartItems();
+}
+
+function renderCartItems() {
+  updateCartBadge();
+  if (!state.cart.length) {
+    dom.cartItems.innerHTML = `<p class="empty-tip">还没有商品，先去商城加购吧。</p>`;
+    return;
+  }
+  dom.cartItems.innerHTML = state.cart
+    .map(
+      (row) => `
+      <div class="cart-item">
+        <div>
+          <strong>${row.name}</strong>
+          <p>${formatCny(row.priceCny)} × ${row.quantity}</p>
+        </div>
+        <div class="qty">
+          <button data-action="cart-minus" data-id="${row.productId}">-</button>
+          <span>${row.quantity}</span>
+          <button data-action="cart-plus" data-id="${row.productId}">+</button>
+        </div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+async function previewCheckout() {
+  if (!state.cart.length) {
+    dom.checkoutSummary.textContent = "购物车为空。";
+    return;
+  }
+  const payload = {
+    items: state.cart.map((row) => ({ productId: row.productId, quantity: row.quantity })),
+    discountCode: String(dom.discountCodeInput.value || "").trim(),
+    shippingMethod: String(dom.shippingMethodSelect.value || "standard"),
+  };
+  const response = await fetch("/api/checkout/preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  const pricing = data.pricing || {};
+  dom.checkoutSummary.innerHTML = `
+    <strong>小计：</strong>${formatCny(pricing.subtotalCny)}<br/>
+    <strong>优惠：</strong>- ${formatCny(pricing.discountCny)}<br/>
+    <strong>运费：</strong>${formatCny(pricing.shippingCny)}<br/>
+    <strong>税费：</strong>${formatCny(pricing.taxCny)}<br/>
+    <strong>应付：</strong>${formatCny(pricing.totalCny)}
+  `;
+}
+
 async function analyzeAvatar() {
   const payload = formToPayload(dom.profileForm);
   payload.faceShapeHint = payload.faceShape;
@@ -163,8 +352,8 @@ async function generateRecommendations(evt) {
   });
   const data = await response.json();
   state.recommendations = data.recommendations || [];
-  state.selectedProductIds = state.recommendations.slice(0, 3).map((item) => item.productId);
-  renderCatalogCards(state.recommendations, false);
+    state.selectedProductIds = state.recommendations.slice(0, 3).map((item) => item.productId);
+  renderCatalogCards(currentDisplayItems(), false);
   await generateTryonPlans();
 }
 
@@ -178,6 +367,54 @@ async function generateTryonPlans() {
   });
   const data = await response.json();
   renderTryonPlans(data.plans || []);
+}
+
+async function submitNewsletter(evt) {
+  evt.preventDefault();
+  const payload = {
+    email: String(dom.newsletterEmail.value || "").trim(),
+    preference: String(dom.newsletterPreference.value || "new-arrivals"),
+  };
+  const response = await fetch("/api/newsletter/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json();
+  dom.newsletterMessage.textContent = data.message || "提交成功。";
+}
+
+function handleCardAction(event) {
+  const btn = event.target.closest("button[data-action]");
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+
+  if (action === "add-cart") {
+    addToCart(id);
+  } else if (action === "quick-view") {
+    const item = findCatalogById(id);
+    if (!item) return;
+    dom.insightBox.innerHTML = `<strong>${item.name}</strong><br/>${item.description}<br/>帽围 ${item.capMinCm}-${item.capMaxCm}cm，库存 ${item.stock}。`;
+    window.location.hash = "#ai-stylist";
+  }
+}
+
+function handleCartAction(event) {
+  const btn = event.target.closest("button[data-action]");
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+  if (action === "cart-minus") {
+    changeCartQuantity(id, -1);
+  } else if (action === "cart-plus") {
+    changeCartQuantity(id, 1);
+  }
+}
+
+function refreshDisplayedCatalog() {
+  const generic = !state.recommendations.length;
+  renderCatalogCards(currentDisplayItems(), generic);
 }
 
 function bindEvents() {
@@ -211,6 +448,32 @@ function bindEvents() {
     dom.insightBox.textContent = "已为你创建 AI 顾问会话：建议先完成头像分析，再生成推荐。";
     window.location.hash = "#ai-stylist";
   });
+
+  dom.cartToggleBtn.addEventListener("click", () => {
+    dom.cartPanel.classList.toggle("open");
+    window.location.hash = "#ai-stylist";
+  });
+
+  dom.checkoutPreviewBtn.addEventListener("click", async () => {
+    await previewCheckout();
+  });
+
+  dom.recommendations.addEventListener("click", handleCardAction);
+  dom.cartItems.addEventListener("click", handleCartAction);
+
+  dom.searchInput.addEventListener("input", refreshDisplayedCatalog);
+  dom.categoryFilter.addEventListener("change", refreshDisplayedCatalog);
+  dom.sceneFilter.addEventListener("change", refreshDisplayedCatalog);
+  dom.sortSelect.addEventListener("change", refreshDisplayedCatalog);
+  dom.resetFilterBtn.addEventListener("click", () => {
+    dom.searchInput.value = "";
+    dom.categoryFilter.value = "";
+    dom.sceneFilter.value = "";
+    dom.sortSelect.value = "recommended";
+    refreshDisplayedCatalog();
+  });
+
+  dom.newsletterForm.addEventListener("submit", submitNewsletter);
 }
 
 function init3dScene() {
@@ -294,7 +557,8 @@ function init3dScene() {
 async function boot() {
   bindEvents();
   init3dScene();
-  await loadCatalog();
+  renderCartItems();
+  await Promise.all([loadCatalog(), loadReviews()]);
 }
 
 boot().catch((error) => {

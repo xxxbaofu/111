@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -19,6 +20,40 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__, template_folder=str(TEMPLATE_DIR), static_folder=str(STATIC_DIR))
 engine = WigAIEngine(get_catalog())
+CATALOG_MAP = {item.product_id.lower(): item for item in get_catalog()}
+REVIEWS = [
+    {
+        "reviewId": "RV-1001",
+        "userName": "Mina",
+        "rating": 5,
+        "scene": "cosplay",
+        "title": "漫展拍照效果非常出片",
+        "content": "AI 推荐很准，头围贴合稳定，戴一整天也不压头。",
+        "productId": "WIG-004",
+        "createdAt": "2026-04-10",
+    },
+    {
+        "reviewId": "RV-1002",
+        "userName": "Lena",
+        "rating": 4,
+        "scene": "daily",
+        "title": "日常通勤自然好打理",
+        "content": "发丝质感不错，客服建议的帽围尺寸合适。",
+        "productId": "WIG-001",
+        "createdAt": "2026-04-14",
+    },
+    {
+        "reviewId": "RV-1003",
+        "userName": "Yuri",
+        "rating": 5,
+        "scene": "stage",
+        "title": "舞台灯下颜色特别亮眼",
+        "content": "试戴计划给的场景提示词很好，妆造师直接用了。",
+        "productId": "WIG-006",
+        "createdAt": "2026-04-18",
+    },
+]
+NEWSLETTER_SUBSCRIBERS: list[dict[str, str]] = []
 
 
 def _safe_list(value: object) -> list[str]:
@@ -56,16 +91,22 @@ def _build_profile(data: dict[str, object]) -> UserProfile:
     )
 
 
-@app.get("/")
-def home() -> str:
-    """Website home page."""
-    return render_template("index.html")
+def _to_int(value: object, fallback: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return fallback
 
 
-@app.get("/api/catalog")
-def catalog() -> object:
-    """Expose catalog data."""
-    products = []
+def _to_float(value: object, fallback: float) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def _catalog_payload() -> list[dict[str, object]]:
+    products: list[dict[str, object]] = []
     for item in get_catalog():
         products.append(
             {
@@ -90,6 +131,19 @@ def catalog() -> object:
                 "description": item.description,
             }
         )
+    return products
+
+
+@app.get("/")
+def home() -> str:
+    """Website home page."""
+    return render_template("index.html")
+
+
+@app.get("/api/catalog")
+def catalog() -> object:
+    """Expose catalog data."""
+    products = _catalog_payload()
     return jsonify({"items": products, "summary": engine.summarize_catalog()})
 
 
@@ -164,6 +218,106 @@ def tryon_plan() -> object:
         for plan in plans
     ]
     return jsonify({"plans": response})
+
+
+@app.get("/api/reviews")
+def reviews() -> object:
+    """Expose featured customer reviews."""
+    limit = _to_int(request.args.get("limit"), 6)
+    scene = str(request.args.get("scene", "")).strip().lower()
+    rows = REVIEWS
+    if scene:
+        rows = [item for item in rows if item["scene"] == scene]
+    return jsonify({"items": rows[: max(limit, 1)], "total": len(rows)})
+
+
+@app.post("/api/checkout/preview")
+def checkout_preview() -> object:
+    """Estimate checkout totals for a lightweight cart payload."""
+    data = request.get_json(silent=True) or {}
+    cart_items = data.get("items", [])
+    if not isinstance(cart_items, list):
+        return jsonify({"error": "items must be a list"}), 400
+
+    normalized = []
+    subtotal = 0.0
+    for row in cart_items:
+        if not isinstance(row, dict):
+            continue
+        product_id = str(row.get("productId", "")).strip().lower()
+        quantity = max(1, _to_int(row.get("quantity"), 1))
+        product = CATALOG_MAP.get(product_id)
+        if not product:
+            continue
+        line_total = product.price_cny * quantity
+        subtotal += line_total
+        normalized.append(
+            {
+                "productId": product.product_id,
+                "name": product.name,
+                "quantity": quantity,
+                "unitPriceCny": product.price_cny,
+                "lineTotalCny": line_total,
+            }
+        )
+
+    express = str(data.get("shippingMethod", "standard")).strip().lower() or "standard"
+    shipping_fee = 0.0
+    if subtotal <= 0:
+        shipping_fee = 0.0
+    elif express == "express":
+        shipping_fee = 36.0
+    elif subtotal < 599:
+        shipping_fee = 18.0
+    else:
+        shipping_fee = 0.0
+
+    discount_code = str(data.get("discountCode", "")).strip().upper()
+    discount = 0.0
+    if discount_code == "WIG10":
+        discount = round(subtotal * 0.1, 2)
+    elif discount_code == "COSPLAY88":
+        discount = 88.0 if subtotal >= 600 else 0.0
+
+    tax = round((subtotal - discount) * 0.03, 2) if subtotal > 0 else 0.0
+    total = round(max(subtotal - discount, 0) + shipping_fee + tax, 2)
+
+    payload = {
+        "items": normalized,
+        "pricing": {
+            "subtotalCny": round(subtotal, 2),
+            "discountCny": round(discount, 2),
+            "shippingCny": round(shipping_fee, 2),
+            "taxCny": tax,
+            "totalCny": total,
+        },
+        "nextStep": "Proceed to secure checkout",
+        "availableCoupons": ["WIG10", "COSPLAY88"],
+    }
+    return jsonify(payload)
+
+
+@app.post("/api/newsletter/subscribe")
+def newsletter_subscribe() -> object:
+    """Store subscriber in memory and return confirmation payload."""
+    data = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    preference = str(data.get("preference", "new-arrivals")).strip().lower()
+    if not email or "@" not in email:
+        return jsonify({"ok": False, "message": "请输入有效邮箱地址。"}), 400
+    existing = next((row for row in NEWSLETTER_SUBSCRIBERS if row["email"] == email), None)
+    if existing:
+        existing["preference"] = preference
+        return jsonify({"ok": True, "message": "该邮箱已订阅，已为你更新偏好。"})
+
+    NEWSLETTER_SUBSCRIBERS.append(
+        {
+            "email": email,
+            "preference": preference,
+            "createdAt": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+    )
+    return jsonify({"ok": True, "message": "订阅成功，首单优惠已发送到你的邮箱。"})
 
 
 if __name__ == "__main__":
