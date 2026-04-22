@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# MuseWig Atelier
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MuseWig Atelier 是一个面向假发选购场景的前端产品站，包含：
 
-Currently, two official plugins are available:
+- 品牌化首页
+- 多分类假发商品库
+- 3D 假头模试戴展示
+- 基于头围、场景、脸型、预算的智能推荐
+- 护理指南、FAQ 与信任建立模块
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 技术栈
 
-## React Compiler
+- React 19
+- TypeScript
+- Vite
+- Three.js / React Three Fiber
+- Lucide React
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 本地运行
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd web
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+默认开发地址：
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+http://localhost:5173
 ```
+
+## 生产构建
+
+```bash
+cd web
+npm run build
+```
+
+## 代码结构
+
+```text
+web/
+├─ public/
+├─ src/
+│  ├─ components/
+│  │  └─ WigCanvas.tsx
+│  ├─ App.tsx
+│  ├─ App.css
+│  ├─ data.ts
+│  └─ index.css
+└─ PRODUCT_BRIEF.md
+```
+
+## 当前实现重点
+
+- 用结构化商品数据支撑目录、推荐和 3D 展示
+- 用懒加载拆分 3D 试戴模块，避免首页首屏一次性加载全部 three 相关代码
+- 采用更适合假发/美妆品牌的网站配色：酒红紫、裸粉、香槟金
+
+## 后续建议
+
+如果要继续做成可正式上线的商业网站，下一步可以增加：
+
+- 购物车与支付
+- 用户账号与收藏
+- 后台商品管理
+- 真人照片/AR 试戴
+- 订单与客服系统
