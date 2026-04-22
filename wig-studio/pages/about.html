@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>品牌故事 · LUMIÈRE WIGS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <section class="hero" style="padding: 60px 0 80px;">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">About LUMIÈRE</div>
+          <h1>让每一顶假发，<br/>都成为你自己的<em>光</em></h1>
+          <p class="lead">LUMIÈRE 创立于 2023 年，是一支由医疗造型师、发型师、3D 艺术家与 Cosplayer 组成的团队。
+          我们相信，假发不是"掩饰"，而是"选择"——每个人都有权选择此刻最想成为的样子。</p>
+        </div>
+        <div class="hero-art">
+          <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#D26A8B"/>
+                <stop offset="100%" stop-color="#6B3FA0"/>
+              </linearGradient>
+            </defs>
+            <circle cx="250" cy="250" r="200" fill="url(#g1)" opacity=".15"/>
+            <circle cx="250" cy="250" r="140" fill="url(#g1)" opacity=".25"/>
+            <circle cx="250" cy="250" r="80"  fill="url(#g1)" opacity=".45"/>
+            <text x="250" y="260" font-family="Playfair Display" font-size="48" font-weight="700" text-anchor="middle" fill="#2A1F2D">LUMIÈRE</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="row wrap" style="gap:32px;">
+          <div class="card" style="flex:1 1 280px; padding:28px;">
+            <h3>🌿 自然</h3>
+            <p style="margin-top:10px; color:var(--ink-soft);">我们的日常系列从发根到发梢，每一根都经过色度匹配，让假发真正"像自己"。</p>
+          </div>
+          <div class="card" style="flex:1 1 280px; padding:28px;">
+            <h3>🎭 表达</h3>
+            <p style="margin-top:10px; color:var(--ink-soft);">Cosplay 系列与知名角色、二次元 IP 合作，还原每一款"标志性发型"。</p>
+          </div>
+          <div class="card" style="flex:1 1 280px; padding:28px;">
+            <h3>🤍 关怀</h3>
+            <p style="margin-top:10px; color:var(--ink-soft);">医疗系列与肿瘤医院合作，为化疗脱发患者提供定制化发型。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <header class="section-head"><div>
+          <div class="eyebrow">Numbers</div>
+          <h2>我们做的，不止是头发</h2>
+        </div></header>
+        <div class="row wrap" style="gap:20px;">
+          <div class="card" style="flex:1 1 200px; padding:24px; text-align:center;">
+            <div style="font-family: var(--f-heading); font-size: 2.4rem; color: var(--rose-dark);">120K+</div>
+            <div style="color:var(--ink-soft);">累计用户</div>
+          </div>
+          <div class="card" style="flex:1 1 200px; padding:24px; text-align:center;">
+            <div style="font-family: var(--f-heading); font-size: 2.4rem; color: var(--violet);">36</div>
+            <div style="color:var(--ink-soft);">合作动漫 IP</div>
+          </div>
+          <div class="card" style="flex:1 1 200px; padding:24px; text-align:center;">
+            <div style="font-family: var(--f-heading); font-size: 2.4rem; color: var(--champagne-deep);">12</div>
+            <div style="color:var(--ink-soft);">合作肿瘤医院</div>
+          </div>
+          <div class="card" style="flex:1 1 200px; padding:24px; text-align:center;">
+            <div style="font-family: var(--f-heading); font-size: 2.4rem; color: var(--rose);">4.8★</div>
+            <div style="color:var(--ink-soft);">平均评分</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container-narrow text-center">
+        <div class="eyebrow">Join Us</div>
+        <h2>你今天想成为谁？</h2>
+        <p class="lead" style="margin: 0 auto; text-align: center;">用我们的 3D 演示、虚拟试戴，为自己找一顶真正合适的假发。</p>
+        <div class="row" style="justify-content:center; gap:12px; margin-top:24px;">
+          <a class="btn btn-rose btn-lg" href="catalog.html">逛假发</a>
+          <a class="btn btn-outline btn-lg" href="quiz.html">测风格</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+  <script type="module">
+    import { mount } from '../assets/js/app.js';
+    mount({ activeKey: 'about' });
+  </script>
+</body>
+</html>

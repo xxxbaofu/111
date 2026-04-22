@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>全部假发 · LUMIÈRE WIGS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <section style="padding-top: 40px; padding-bottom: 20px;">
+      <div class="container">
+        <div class="eyebrow">Shop</div>
+        <h2 id="cat-title">全部假发</h2>
+        <p class="lead" id="cat-desc">120+ 精选假发，支持在线 3D 预览与虚拟试戴。</p>
+      </div>
+    </section>
+
+    <section style="padding-top: 0;">
+      <div class="container">
+        <div class="catalog-layout">
+          <!-- 侧边筛选 -->
+          <aside class="filters" id="filters">
+            <div class="between">
+              <h5 style="margin:0;">筛选</h5>
+              <button class="btn btn-ghost btn-sm" id="reset">重置</button>
+            </div>
+            <div class="divider"></div>
+
+            <div class="group">
+              <h5>搜索</h5>
+              <div class="form-field"><input type="text" id="q" placeholder="搜索名称、标签、颜色" /></div>
+            </div>
+
+            <div class="group">
+              <h5>分类</h5>
+              <div class="chip-group" data-filter="category"></div>
+            </div>
+
+            <div class="group">
+              <h5>发型</h5>
+              <div class="chip-group" data-filter="style"></div>
+            </div>
+
+            <div class="group">
+              <h5>长度</h5>
+              <div class="chip-group" data-filter="length"></div>
+            </div>
+
+            <div class="group">
+              <h5>材质</h5>
+              <div class="chip-group" data-filter="material"></div>
+            </div>
+
+            <div class="group">
+              <h5>颜色</h5>
+              <div class="color-dots" id="color-filters"></div>
+            </div>
+
+            <div class="group">
+              <h5>头围尺码</h5>
+              <div class="chip-group" data-filter="size"></div>
+            </div>
+
+            <div class="group">
+              <h5>价格区间</h5>
+              <div class="range-row">
+                <input type="range" min="0" max="3000" step="100" value="3000" id="price-max" />
+                <span style="font-weight:600;" id="price-label">≤ ¥3000</span>
+              </div>
+            </div>
+          </aside>
+
+          <!-- 商品 -->
+          <div>
+            <div class="catalog-toolbar">
+              <div class="count" id="count">—</div>
+              <div class="row" style="gap:12px;">
+                <label class="row" style="align-items:center; gap:8px;">
+                  <span style="font-size:.9rem; color:var(--ink-soft);">排序</span>
+                  <select class="select" id="sort">
+                    <option value="pop">人气</option>
+                    <option value="price-asc">价格 · 低到高</option>
+                    <option value="price-desc">价格 · 高到低</option>
+                    <option value="rating">评分</option>
+                    <option value="new">最新</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div id="grid" class="product-grid"></div>
+            <div id="empty" class="empty hidden">没有找到符合条件的假发。试着放宽一下筛选条件？</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+
+  <script type="module" src="../assets/js/catalog.js"></script>
+</body>
+</html>

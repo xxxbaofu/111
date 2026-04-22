@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>产品详情 · LUMIÈRE WIGS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <section style="padding-top:32px;">
+      <div class="container">
+        <div style="color:var(--ink-soft); font-size:.9rem;" id="crumb">
+          <a href="../index.html">首页</a> / <a href="catalog.html">假发</a> / <span id="crumb-name">加载中…</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top: 20px;">
+      <div class="container">
+        <div class="product-layout">
+          <div>
+            <div class="product-viewer" id="viewer3d">
+              <div class="viewer-tag">🪄 3D 实时预览 · 拖动旋转</div>
+              <div class="viewer-controls">
+                <button data-view="auto" class="active" title="自动旋转">↻</button>
+                <button data-view="front" title="正面">正面</button>
+                <button data-view="side"  title="侧面">侧面</button>
+                <button data-view="back"  title="背面">背面</button>
+                <button data-view="reset" title="复位">⟲</button>
+              </div>
+            </div>
+
+            <div class="row wrap" style="gap:12px; margin-top:16px;">
+              <div class="card" style="padding:16px; flex:1 1 200px;">
+                <div class="eyebrow">小贴士</div>
+                <p style="font-size:.9rem; color:var(--ink-soft); margin-top:6px;">拖动 3D 假发可以 360° 查看效果，右下角按钮可切换正面 / 侧面 / 背面 / 自动旋转。</p>
+              </div>
+              <a href="tryon.html" class="card" style="padding:16px; flex:1 1 200px; display:flex; flex-direction:column; gap:6px;">
+                <div class="eyebrow">想看在自己脸上的效果？</div>
+                <strong>立即虚拟试戴 →</strong>
+              </a>
+            </div>
+          </div>
+
+          <div class="product-info" id="info">
+            <div class="skeleton" style="height:2.5rem; width:70%;"></div>
+            <div class="skeleton mt-3" style="height:1rem; width:50%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="tabs">
+          <button class="tab active" data-tab="desc">商品描述</button>
+          <button class="tab" data-tab="spec">规格参数</button>
+          <button class="tab" data-tab="care">护理保养</button>
+          <button class="tab" data-tab="ship">运费与售后</button>
+        </div>
+        <div class="tab-content" id="tab-desc"></div>
+        <div class="tab-content hidden" id="tab-spec"></div>
+        <div class="tab-content hidden" id="tab-care">
+          <p>• 梳理：使用专用假发梳，由发尾向上轻柔梳理；</p>
+          <p>• 清洗：用假发专用洗发液，温水浸泡 5-10 分钟，勿揉搓；</p>
+          <p>• 造型：高温丝可承受 ≤180°C，真人发可烫染（请由专业造型师处理）；</p>
+          <p>• 收纳：使用假发支架或干净发网，避免阳光直射与潮湿环境。</p>
+        </div>
+        <div class="tab-content hidden" id="tab-ship">
+          <p>• 全国顺丰包邮（满 ¥999），48 小时内发货；</p>
+          <p>• 中性隐私包装，外箱无产品信息；</p>
+          <p>• 30 天无理由退换（需保证卫生与标签完整）；</p>
+          <p>• 6 个月质保，非人为脱落 / 褪色免费修复。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <header class="section-head"><div>
+          <div class="eyebrow">You may also like</div>
+          <h2>她们还在看</h2>
+        </div></header>
+        <div class="product-grid" id="related"></div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+  <script type="module" src="../assets/js/product.js"></script>
+</body>
+</html>

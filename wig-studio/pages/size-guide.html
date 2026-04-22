@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>头围与尺寸指南 · LUMIÈRE WIGS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <section style="padding-top:40px;">
+      <div class="container">
+        <div class="eyebrow">Size Guide</div>
+        <h2>量出你的头围，找到真正合身的那顶假发</h2>
+        <p class="lead">假发的舒适度 70% 取决于尺码是否合适。跟着 4 个简单步骤量一次，终身适用。</p>
+      </div>
+    </section>
+
+    <section style="padding-top: 20px;">
+      <div class="container" style="display:grid; grid-template-columns: 1.1fr 1fr; gap:40px; align-items:flex-start;">
+        <div>
+          <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" style="border-radius:28px; background: linear-gradient(160deg,#F8EBE6,#E2D4F3);">
+            <defs>
+              <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F6DEC8"/><stop offset="100%" stop-color="#E9BFA0"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="250" cy="240" rx="110" ry="135" fill="url(#skin)"/>
+            <rect x="220" y="355" width="60" height="60" fill="url(#skin)"/>
+            <!-- 测量线 1：额头到后颈 -->
+            <path d="M 150 160 Q 250 100 350 160" stroke="#D26A8B" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+            <circle cx="150" cy="160" r="5" fill="#D26A8B"/>
+            <circle cx="350" cy="160" r="5" fill="#D26A8B"/>
+            <!-- 头围 2：耳上 -->
+            <path d="M 140 260 Q 250 320 360 260 Q 250 200 140 260 Z" stroke="#6B3FA0" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+            <!-- 耳朵 -->
+            <ellipse cx="138" cy="250" rx="8" ry="15" fill="#E8BFA0"/>
+            <ellipse cx="362" cy="250" rx="8" ry="15" fill="#E8BFA0"/>
+            <!-- 标注 -->
+            <text x="170" y="135" fill="#D26A8B" font-size="14" font-weight="700">① 额头到后颈</text>
+            <text x="170" y="355" fill="#6B3FA0" font-size="14" font-weight="700">② 耳上头围（关键）</text>
+            <!-- 左右测量线 -->
+            <path d="M 80 260 L 420 260" stroke="#D29A4C" stroke-width="2" fill="none" stroke-dasharray="3 3"/>
+            <text x="80" y="250" fill="#A64866" font-size="12">③ 前后（耳上 1cm）</text>
+          </svg>
+
+          <div class="row wrap mt-5" style="gap:16px;">
+            <a class="btn btn-rose" href="tryon.html">顺便去虚拟试戴 →</a>
+            <a class="btn btn-ghost" href="catalog.html">逛假发</a>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="size-steps">
+            <div class="step"><div class="num">1</div><h4>额头到后颈</h4><p style="color:var(--ink-soft); font-size:.9rem;">用软尺，从发际线正上方沿头顶绕到后颈（枕骨下方）。</p></div>
+            <div class="step"><div class="num">2</div><h4>耳上头围</h4><p style="color:var(--ink-soft); font-size:.9rem;">经过耳朵上方 1 指处，水平绕头一圈。这是最关键的尺寸。</p></div>
+            <div class="step"><div class="num">3</div><h4>左右耳之间</h4><p style="color:var(--ink-soft); font-size:.9rem;">经过头顶，从左耳尖到右耳尖的距离。</p></div>
+            <div class="step"><div class="num">4</div><h4>填写下方</h4><p style="color:var(--ink-soft); font-size:.9rem;">输入耳上头围（最关键），我们自动给你匹配尺码。</p></div>
+          </div>
+
+          <div class="card" style="padding:24px; margin-top:24px;">
+            <div class="form-field">
+              <label>耳上头围（cm）</label>
+              <div class="range-row">
+                <input type="range" min="48" max="64" step="0.5" value="56" id="cm-range" />
+                <span id="cm-label" style="font-weight:700; font-size:1.1rem; color:var(--rose-dark);">56 cm</span>
+              </div>
+            </div>
+
+            <div class="form-field mt-4">
+              <label>脸型</label>
+              <div class="chip-group" id="face">
+                <button class="chip active" data-face="oval">椭圆</button>
+                <button class="chip" data-face="round">圆形</button>
+                <button class="chip" data-face="square">方形</button>
+                <button class="chip" data-face="heart">心形</button>
+                <button class="chip" data-face="long">长形</button>
+              </div>
+            </div>
+
+            <div class="size-result mt-5">
+              <div class="eyebrow" style="color:var(--ink-soft);">推荐尺码</div>
+              <div class="big" id="size-big">—</div>
+              <div style="color:var(--ink-soft);" id="size-desc">输入头围即可得到推荐。</div>
+              <div class="mt-4" style="font-size:.9rem; color:var(--ink-soft);" id="face-desc"></div>
+              <a class="btn btn-rose mt-5" href="catalog.html" id="go-shop">去选购合适的假发 →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="card" style="padding:28px;">
+          <h3>常见问题</h3>
+          <div class="mt-4" style="color:var(--ink-soft); line-height:1.9;">
+            <p><strong>Q：量完头围介于两个尺码之间？</strong> A：建议选小的，配合调节带。</p>
+            <p><strong>Q：真人发假发可以烫染吗？</strong> A：可以，但建议由专业造型师操作。</p>
+            <p><strong>Q：假发要每天清洗吗？</strong> A：不需要。正常佩戴 15-25 次左右清洗一次。</p>
+            <p><strong>Q：Cosplay 和日常款有什么区别？</strong> A：Cosplay 系列颜色更饱和、发量更夸张，为角色还原设计；日常款更追求"像自己的真发"。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+  <script type="module" src="../assets/js/size-guide.js"></script>
+</body>
+</html>

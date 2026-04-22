@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FDF8F3" />
+  <title>LUMIÈRE WIGS · 为每一种风格点亮光</title>
+  <meta name="description" content="LUMIÈRE WIGS 是一家专业的假发 3D 演示与虚拟试戴平台，提供日常、Cosplay、医疗、Lace Front 全品类假发。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23D26A8B'/></svg>" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">LUMIÈRE · 春夏新品</div>
+          <h1>让每一束<em>光</em>，
+都落在你身上</h1>
+          <p class="lead">真人发 · Lace Front · Cosplay 超还原系列。在线 360° 看效果，还能虚拟试戴，先看清楚再下单。</p>
+          <div class="hero-cta">
+            <a href="pages/catalog.html" class="btn btn-rose btn-lg">逛全部假发 →</a>
+            <a href="pages/tryon.html" class="btn btn-outline btn-lg">立即试戴</a>
+          </div>
+          <div class="hero-meta">
+            <div class="m"><strong>120+</strong><span>精选 SKU</span></div>
+            <div class="m"><strong>18</strong><span>专业色卡</span></div>
+            <div class="m"><strong>5</strong><span>头围尺码</span></div>
+            <div class="m"><strong>4.8★</strong><span>平均评分</span></div>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="h" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2A1F2D"/>
+                <stop offset="100%" stop-color="#6B3FA0"/>
+              </linearGradient>
+              <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#F6DEC8"/>
+                <stop offset="100%" stop-color="#E8BFA0"/>
+              </linearGradient>
+              <linearGradient id="bgh" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#FBE3E9"/>
+                <stop offset="100%" stop-color="#E2D4F3"/>
+              </linearGradient>
+              <radialGradient id="glow" cx=".5" cy=".5" r=".5">
+                <stop offset="0%" stop-color="#fff" stop-opacity=".7"/>
+                <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <rect width="500" height="500" fill="url(#bgh)"/>
+            <circle cx="250" cy="260" r="220" fill="url(#glow)"/>
+            <path d="M 90 520 Q 200 340 250 340 Q 300 340 410 520 Z" fill="#B392E0" opacity=".6"/>
+            <ellipse cx="250" cy="220" rx="90" ry="115" fill="url(#s)"/>
+            <rect x="220" y="315" width="60" height="60" fill="url(#s)"/>
+            <circle cx="222" cy="220" r="5" fill="#2A1F2D"/>
+            <circle cx="278" cy="220" r="5" fill="#2A1F2D"/>
+            <path d="M 236 265 Q 250 278 264 265" stroke="#C06F7E" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 225 150 Q 250 65 275 150
+                     Q 350 180 345 260
+                     Q 370 330 345 420
+                     Q 300 370 275 380
+                     Q 310 300 290 240
+                     Q 250 180 210 240
+                     Q 190 300 225 380
+                     Q 200 370 155 420
+                     Q 130 330 155 260
+                     Q 150 180 225 150 Z"
+                  fill="url(#h)"/>
+            <!-- 樱花装饰 -->
+            <g opacity=".85">
+              <circle cx="80" cy="80" r="10" fill="#F4A6B5"/>
+              <circle cx="420" cy="70" r="14" fill="#B392E0"/>
+              <circle cx="440" cy="400" r="8" fill="#E8C8A0"/>
+              <circle cx="60" cy="390" r="12" fill="#D26A8B"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 分类 -->
+    <section>
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <div class="eyebrow">Shop by Category</div>
+            <h2>你要哪一种风格？</h2>
+            <p class="lead">从通勤日常到动漫角色，我们为每一种生活场景准备了专属系列。</p>
+          </div>
+          <a href="pages/catalog.html" class="btn btn-ghost">查看全部 →</a>
+        </header>
+        <div class="cat-tiles" id="cat-tiles"></div>
+      </div>
+    </section>
+
+    <!-- 精选 -->
+    <section>
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <div class="eyebrow">Bestsellers</div>
+            <h2>本月热卖精选</h2>
+            <p class="lead">用户最爱 + 小红书种草榜单。</p>
+          </div>
+          <a href="pages/catalog.html" class="btn btn-ghost">查看全部 →</a>
+        </header>
+        <div class="product-grid" id="featured-grid"></div>
+      </div>
+    </section>
+
+    <!-- 体验 -->
+    <section style="background: linear-gradient(180deg, transparent, #F5EBE6);">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <div class="eyebrow">Why LUMIÈRE</div>
+            <h2>三步找到最适合你的假发</h2>
+          </div>
+        </header>
+        <div class="row wrap" style="gap:24px;">
+          <a href="pages/quiz.html" class="card" style="flex:1 1 280px; padding:28px;">
+            <div class="pill">STEP 1</div>
+            <h3 style="margin:12px 0 6px;">风格测试</h3>
+            <p style="color:var(--ink-soft);font-size:.95rem;">6 道题，帮你找到最合适的发型、颜色与长度。</p>
+            <div class="btn btn-outline btn-sm" style="margin-top:16px;">开始测试 →</div>
+          </a>
+          <a href="pages/size-guide.html" class="card" style="flex:1 1 280px; padding:28px;">
+            <div class="pill">STEP 2</div>
+            <h3 style="margin:12px 0 6px;">头围与脸型</h3>
+            <p style="color:var(--ink-soft);font-size:.95rem;">一张图示教你量出正确的头围，输入即可匹配尺码。</p>
+            <div class="btn btn-outline btn-sm" style="margin-top:16px;">测头围 →</div>
+          </a>
+          <a href="pages/tryon.html" class="card" style="flex:1 1 280px; padding:28px;">
+            <div class="pill">STEP 3</div>
+            <h3 style="margin:12px 0 6px;">虚拟试戴</h3>
+            <p style="color:var(--ink-soft);font-size:.95rem;">上传自拍，直接在浏览器叠加假发，拖拽调整超直观。</p>
+            <div class="btn btn-outline btn-sm" style="margin-top:16px;">开始试戴 →</div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 特性条 -->
+    <section>
+      <div class="container">
+        <div class="features">
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 9 18l-5-5"/></svg>
+            <div><strong>30 天无理由退换</strong><p>卫生原因未戴过、标签完整即可退货。</p></div>
+          </div>
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18M5 6h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/></svg>
+            <div><strong>顺丰隐私包装</strong><p>中性外包装不留产品信息，保护你的隐私。</p></div>
+          </div>
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <div><strong>48 小时发货</strong><p>全国主流城市 3 天内送达，海外直邮同步开启。</p></div>
+          </div>
+          <div class="item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 10 5-1 9-5 9-10V7Z"/></svg>
+            <div><strong>6 个月质保</strong><p>非人为脱落/褪色，6 个月内免费修复或更换。</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cosplay 专区 -->
+    <section>
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <div class="eyebrow">Cosplay Spotlight</div>
+            <h2>Cosplay 系列 · 还原度拉满</h2>
+            <p class="lead">从魔法少女到高冷男主，40+ 种角色色卡任你挑选。</p>
+          </div>
+          <a href="pages/catalog.html?c=cosplay" class="btn btn-rose">进入专区 →</a>
+        </header>
+        <div class="product-grid" id="cosplay-grid"></div>
+      </div>
+    </section>
+
+    <!-- 评价 -->
+    <section style="background:var(--pearl);">
+      <div class="container">
+        <header class="section-head"><div>
+          <div class="eyebrow">Reviews</div>
+          <h2>她们都在戴 LUMIÈRE</h2>
+        </div></header>
+        <div class="row wrap" style="gap:24px;">
+          <div class="card" style="flex:1 1 280px; padding:24px;">
+            <div style="color:#E8A94C; font-size:1.1rem;">★★★★★</div>
+            <p style="margin-top:10px;">"蓝色双马尾对我这种新手 Coser 太友好了，发色和图片一模一样，发量也够。"</p>
+            <div style="color:var(--ink-soft); font-size:.85rem; margin-top:10px;">— 小月 · Cosplayer</div>
+          </div>
+          <div class="card" style="flex:1 1 280px; padding:24px;">
+            <div style="color:#E8A94C; font-size:1.1rem;">★★★★★</div>
+            <p style="margin-top:10px;">"做完化疗后戴了几款假发，LUMIÈRE 的医疗款是里面最轻最透气的。"</p>
+            <div style="color:var(--ink-soft); font-size:.85rem; margin-top:10px;">— Linda · 北京</div>
+          </div>
+          <div class="card" style="flex:1 1 280px; padding:24px;">
+            <div style="color:#E8A94C; font-size:1.1rem;">★★★★★</div>
+            <p style="margin-top:10px;">"在线 3D 转一圈后才决定买，到手颜色和屏幕差不多，惊喜！"</p>
+            <div style="color:var(--ink-soft); font-size:.85rem; margin-top:10px;">— Vivi · 上海</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+
+  <script type="module">
+    import { mount, productCardHTML, bindFavDelegation } from './assets/js/app.js';
+    import { CATEGORIES, PRODUCTS } from './assets/js/data.js';
+
+    mount({ activeKey: 'home' });
+
+    // 分类瓷砖
+    document.getElementById('cat-tiles').innerHTML = CATEGORIES.map((c) => `
+      <a class="cat-tile" href="pages/catalog.html?c=${c.id}">
+        <div class="emoji">${c.emoji}</div>
+        <h4>${c.name}</h4>
+        <p>${c.desc}</p>
+      </a>
+    `).join('');
+
+    // 精选
+    const featured = PRODUCTS.slice(0, 8);
+    document.getElementById('featured-grid').innerHTML = featured.map((p) => productCardHTML(p)).join('');
+
+    // Cosplay
+    const cos = PRODUCTS.filter((p) => p.category === 'cosplay').slice(0, 4);
+    document.getElementById('cosplay-grid').innerHTML = cos.map((p) => productCardHTML(p)).join('');
+
+    bindFavDelegation();
+  </script>
+</body>
+</html>

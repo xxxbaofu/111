@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>我的账户 · LUMIÈRE WIGS</title>
+  <link rel="stylesheet" href="../assets/css/main.css" />
+</head>
+<body>
+  <div data-role="header"></div>
+
+  <main>
+    <section style="padding-top:40px;">
+      <div class="container">
+        <div class="eyebrow">Account</div>
+        <h2>我的 LUMIÈRE</h2>
+      </div>
+    </section>
+
+    <section style="padding-top:20px;">
+      <div class="container">
+        <div class="account-layout">
+          <aside>
+            <nav class="account-menu" id="menu">
+              <a data-tab="profile" class="active" href="#profile">个人资料</a>
+              <a data-tab="wish" href="#wish">我的收藏</a>
+              <a data-tab="recent" href="#recent">最近浏览</a>
+              <a data-tab="orders" href="#orders">订单</a>
+              <a data-tab="address" href="#address">收货地址</a>
+            </nav>
+          </aside>
+          <div>
+            <section data-pane="profile" class="card" style="padding:28px;">
+              <h3>个人资料 & 头围</h3>
+              <p style="color:var(--ink-soft); font-size:.9rem; margin-top:4px;">维护你的头围、脸型和偏好，购买和试戴时我们会自动帮你筛选匹配的尺码。</p>
+              <div class="form-grid mt-5">
+                <div class="form-field"><label>昵称</label><input id="p-name" type="text" placeholder="小花" /></div>
+                <div class="form-field"><label>邮箱</label><input id="p-email" type="email" placeholder="hi@example.com" /></div>
+                <div class="form-field"><label>耳上头围（cm）</label><input id="p-head" type="number" step="0.5" placeholder="56" /></div>
+                <div class="form-field">
+                  <label>脸型</label>
+                  <select id="p-face">
+                    <option value="oval">椭圆</option>
+                    <option value="round">圆形</option>
+                    <option value="square">方形</option>
+                    <option value="heart">心形</option>
+                    <option value="long">长形</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>偏好风格</label>
+                  <select id="p-pref">
+                    <option value="daily">日常自然</option>
+                    <option value="fashion">时尚造型</option>
+                    <option value="cosplay">Cosplay</option>
+                    <option value="medical">医疗舒适</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-rose mt-5" id="save-profile">保存资料</button>
+            </section>
+
+            <section data-pane="wish" class="hidden">
+              <h3 style="margin-bottom:16px;">我的收藏</h3>
+              <div id="wish-grid" class="product-grid"></div>
+              <div id="wish-empty" class="empty hidden">还没有收藏的假发，快去挑几款吧。</div>
+            </section>
+
+            <section data-pane="recent" class="hidden">
+              <h3 style="margin-bottom:16px;">最近浏览</h3>
+              <div id="recent-grid" class="product-grid"></div>
+              <div id="recent-empty" class="empty hidden">最近还没有看过假发。</div>
+            </section>
+
+            <section data-pane="orders" class="hidden card" style="padding:28px;">
+              <h3>订单</h3>
+              <p style="color:var(--ink-soft);">Demo 模式下订单仅作展示：</p>
+              <div class="mt-4" id="orders-list"></div>
+            </section>
+
+            <section data-pane="address" class="hidden card" style="padding:28px;">
+              <h3>收货地址</h3>
+              <p style="color:var(--ink-soft);">LUMIÈRE 采用顺丰中性隐私包装，外箱无产品信息。</p>
+              <div class="form-grid mt-5">
+                <div class="form-field"><label>收件人</label><input type="text" placeholder="你的姓名" /></div>
+                <div class="form-field"><label>电话</label><input type="tel" placeholder="手机号码" /></div>
+                <div class="form-field"><label>省 / 市 / 区</label><input type="text" placeholder="省 市 区" /></div>
+                <div class="form-field"><label>详细地址</label><input type="text" placeholder="街道、门牌号等" /></div>
+              </div>
+              <button class="btn btn-rose mt-5">保存地址</button>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div data-role="footer"></div>
+  <script type="module" src="../assets/js/account.js"></script>
+</body>
+</html>
