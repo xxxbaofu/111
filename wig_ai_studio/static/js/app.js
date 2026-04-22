@@ -8,7 +8,7 @@ const state = {
   wigColorIndex: 0,
 };
 
-const CART_STORAGE_KEY = "wigverse-cart-v2";
+const CART_STORAGE_KEY = "wigverse-cart-v3";
 const wigColors = [0xd63384, 0x6f42c1, 0x20c997, 0xfd7e14];
 
 const dom = {
@@ -28,13 +28,15 @@ const dom = {
   avatarPreview: document.getElementById("avatarPreview"),
   insightBox: document.getElementById("insightBox"),
   tryonPlans: document.getElementById("tryonPlans"),
-  generateTryonImageBtn: document.getElementById("generateTryonImageBtn"),
-  tryonUseRealAi: document.getElementById("tryonUseRealAi"),
-  renderStyleInput: document.getElementById("renderStyleInput"),
+  tryonImageCount: document.getElementById("tryonImageCount"),
+  tryonRenderStyle: document.getElementById("tryonRenderStyle"),
   tryonImageSize: document.getElementById("tryonImageSize"),
-  imageCountInput: document.getElementById("imageCountInput"),
-  generatedImages: document.getElementById("generatedImages"),
-  imageGenerationNotice: document.getElementById("imageGenerationNotice"),
+  useRealAiToggle: document.getElementById("useRealAiToggle"),
+  generateTryonBtn: document.getElementById("generateTryonBtn"),
+  applyTryonSelectionBtn: document.getElementById("applyTryonSelectionBtn"),
+  tryonWarnings: document.getElementById("tryonWarnings"),
+  tryonIntegrationTips: document.getElementById("tryonIntegrationTips"),
+  tryonGallery: document.getElementById("tryonGallery"),
   cartBadge: document.getElementById("cartBadge"),
   cartItems: document.getElementById("cartItems"),
   discountCodeInput: document.getElementById("discountCodeInput"),
@@ -66,13 +68,14 @@ function formatCny(value) {
 }
 
 function showToast(message, variant = "success") {
-  if (!dom.toast) return;
+  if (!dom.toast || typeof bootstrap === "undefined") return;
   dom.toast.classList.remove("text-bg-success", "text-bg-danger", "text-bg-warning");
   if (variant === "error") dom.toast.classList.add("text-bg-danger");
   else if (variant === "warning") dom.toast.classList.add("text-bg-warning");
   else dom.toast.classList.add("text-bg-success");
-  dom.toast.querySelector(".toast-body").textContent = message;
-  const toast = bootstrap.Toast.getOrCreateInstance(dom.toast, { delay: 2300 });
+  const body = dom.toast.querySelector(".toast-body");
+  if (body) body.textContent = message;
+  const toast = bootstrap.Toast.getOrCreateInstance(dom.toast, { delay: 2200 });
   toast.show();
 }
 
@@ -127,12 +130,14 @@ function formToPayload(form) {
 
 function currentDisplayItems() {
   const source = state.recommendations.length ? state.recommendations : state.catalog;
-  const keyword = String(dom.searchInput.value || "").trim().toLowerCase();
-  const category = String(dom.categoryFilter.value || "").toLowerCase();
-  const scene = String(dom.sceneFilter.value || "").toLowerCase();
-  const sort = String(dom.sortSelect.value || "recommended");
+  const keyword = String(dom.searchInput?.value || "")
+    .trim()
+    .toLowerCase();
+  const category = String(dom.categoryFilter?.value || "").toLowerCase();
+  const scene = String(dom.sceneFilter?.value || "").toLowerCase();
+  const sort = String(dom.sortSelect?.value || "recommended");
 
-  let items = source.filter((item) => {
+  const filtered = source.filter((item) => {
     const name = String(item.name || "").toLowerCase();
     const style = String(item.style || "").toLowerCase();
     const color = String(item.colorFamily || item.baseColor || "").toLowerCase();
@@ -143,28 +148,32 @@ function currentDisplayItems() {
   });
 
   if (sort === "price-asc") {
-    items.sort((a, b) => Number(a.priceCny || 0) - Number(b.priceCny || 0));
+    filtered.sort((a, b) => Number(a.priceCny || 0) - Number(b.priceCny || 0));
   } else if (sort === "price-desc") {
-    items.sort((a, b) => Number(b.priceCny || 0) - Number(a.priceCny || 0));
+    filtered.sort((a, b) => Number(b.priceCny || 0) - Number(a.priceCny || 0));
   } else if (sort === "rating-desc") {
-    items.sort((a, b) => {
+    filtered.sort((a, b) => {
       const left = Number(state.catalogById.get(String(a.productId || "").toLowerCase())?.rating || a.rating || 0);
-      const right = Number(state.catalogById.get(String(b.productId || "").toLowerCase())?.rating || b.rating || 0);
+      const right = Number(
+        state.catalogById.get(String(b.productId || "").toLowerCase())?.rating || b.rating || 0
+      );
       return right - left;
     });
   } else if (state.recommendations.length) {
-    items.sort((a, b) => Number(b.matchScore || 0) - Number(a.matchScore || 0));
+    filtered.sort((a, b) => Number(b.matchScore || 0) - Number(a.matchScore || 0));
   }
-
-  dom.resultMeta.textContent = `当前展示 ${items.length} 款商品`;
-  return items;
+  return filtered;
 }
 
 function renderCatalogCards(items, generic = false) {
+  if (!dom.recommendations) return;
   if (!items.length) {
-    dom.recommendations.innerHTML = `<div class="col-12"><div class="alert alert-warning mb-0">暂无匹配商品，请调整筛选条件。</div></div>`;
+    dom.recommendations.innerHTML =
+      '<div class="alert alert-warning mb-0">暂无匹配商品，请调整筛选条件。</div>';
+    if (dom.resultMeta) dom.resultMeta.textContent = "当前展示 0 款商品";
     return;
   }
+  if (dom.resultMeta) dom.resultMeta.textContent = `当前展示 ${items.length} 款商品`;
 
   dom.recommendations.innerHTML = items
     .map((item) => {
@@ -172,10 +181,13 @@ function renderCatalogCards(items, generic = false) {
         ? ["可用于 AI 试戴流程", `适用场景：${(item.scenes || []).join(" / ")}`]
         : item.aiReasons || [];
       const productId = item.productId || "";
-      const badge = item.cosplay ? '<span class="badge text-bg-warning-subtle text-warning-emphasis">Cosplay</span>' : "";
       const scoreBlock = generic
         ? `<h5 class="text-primary mb-2">${formatCny(item.priceCny)}</h5>`
         : `<h5 class="text-primary mb-2">${item.matchScore}<small class="text-muted"> /100 AI匹配</small></h5>`;
+      const badge = item.cosplay
+        ? '<span class="badge text-bg-warning-subtle text-warning-emphasis">Cosplay</span>'
+        : "";
+
       return `
       <div class="col-lg-4 col-md-6">
         <div class="card h-100 shadow-sm border-0">
@@ -188,16 +200,16 @@ function renderCatalogCards(items, generic = false) {
             <div class="d-flex flex-wrap gap-2 mb-3">
               <span class="badge rounded-pill text-bg-light">${item.style}</span>
               <span class="badge rounded-pill text-bg-light">${item.colorFamily || item.baseColor}</span>
-              <span class="badge rounded-pill text-bg-light">${item.capRange || `${item.capMinCm}-${item.capMaxCm}cm`}</span>
+              <span class="badge rounded-pill text-bg-light">${
+                item.capRange || `${item.capMinCm}-${item.capMaxCm}cm`
+              }</span>
             </div>
             ${
               generic
                 ? ""
                 : `<div class="small text-muted mb-2">头围 ${item.fitScore} · 风格 ${item.styleScore} · 场景 ${item.sceneScore}</div>`
             }
-            <ul class="small ps-3 mb-0">
-              ${reasons.map((line) => `<li>${line}</li>`).join("")}
-            </ul>
+            <ul class="small ps-3 mb-0">${reasons.map((line) => `<li>${line}</li>`).join("")}</ul>
           </div>
           <div class="card-footer bg-white border-0 d-grid gap-2 d-md-flex">
             <button class="btn btn-outline-secondary btn-sm flex-fill" data-action="quick-view" data-id="${productId}">
@@ -214,6 +226,7 @@ function renderCatalogCards(items, generic = false) {
 }
 
 function renderTryonPlans(plans) {
+  if (!dom.tryonPlans) return;
   dom.tryonPlans.innerHTML = plans
     .map(
       (plan) => `
@@ -228,38 +241,45 @@ function renderTryonPlans(plans) {
 }
 
 function renderGeneratedImages(images) {
+  if (!dom.tryonGallery) return;
   if (!images.length) {
-    dom.generatedImages.innerHTML = '<div class="text-muted small">暂无生成结果</div>';
+    dom.tryonGallery.innerHTML = '<div class="text-muted small">暂无生成结果</div>';
     return;
   }
-  dom.generatedImages.innerHTML = images
-    .map(
-      (item) => `
+  dom.tryonGallery.innerHTML = `
+    <div class="row g-3">
+      ${images
+        .map(
+          (item) => `
       <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
           <img src="${item.imageUrl}" alt="tryon-${item.scene}" class="card-img-top object-fit-cover" style="height: 220px;" />
           <div class="card-body">
             <div class="fw-semibold">${item.scene}</div>
             <div class="small text-muted mb-2">Provider: ${item.provider}</div>
-            <div class="small">${item.recommendedProductIds.join(", ")}</div>
+            <div class="small">${(item.recommendedProductIds || []).join(", ")}</div>
           </div>
         </div>
-      </div>
-    `
-    )
-    .join("");
+      </div>`
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function updateCartBadge() {
+  if (!dom.cartBadge) return;
   const count = state.cart.reduce((sum, row) => sum + row.quantity, 0);
   dom.cartBadge.textContent = String(count);
 }
 
 function renderCartItems() {
+  if (!dom.cartItems) return;
   updateCartBadge();
   saveCart();
   if (!state.cart.length) {
     dom.cartItems.innerHTML = '<div class="text-muted small">购物车为空</div>';
+    if (dom.checkoutNotice) dom.checkoutNotice.textContent = "";
     return;
   }
   dom.cartItems.innerHTML = state.cart
@@ -314,41 +334,45 @@ async function loadCatalog() {
   const data = await response.json();
   state.catalog = data.items || [];
   state.catalogById = new Map(state.catalog.map((item) => [String(item.productId).toLowerCase(), item]));
-
   const summary = data.summary || {};
-  dom.metricProducts.textContent = summary.total_products ?? "--";
-  dom.metricRating.textContent = summary.avg_rating ?? "--";
-  dom.metricCosplay.textContent = `${Math.round(Number(summary.cosplay_ratio || 0) * 100)}%`;
-
+  if (dom.metricProducts) dom.metricProducts.textContent = summary.total_products ?? "--";
+  if (dom.metricRating) dom.metricRating.textContent = summary.avg_rating ?? "--";
+  if (dom.metricCosplay) dom.metricCosplay.textContent = `${Math.round(Number(summary.cosplay_ratio || 0) * 100)}%`;
   renderCatalogCards(currentDisplayItems(), true);
 }
 
 async function loadReviews() {
+  if (!dom.reviewList) return;
   const response = await fetch("/api/reviews?limit=6");
   if (!response.ok) throw new Error("reviews_failed");
   const data = await response.json();
   const reviews = data.items || [];
-  dom.reviewList.innerHTML = reviews
-    .map(
-      (item) => `
-    <div class="col-lg-4 col-md-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <strong>${item.userName}</strong>
-            <span class="small text-warning">${"★".repeat(item.rating)}${"☆".repeat(5 - item.rating)}</span>
+  dom.reviewList.innerHTML = `
+    <div class="row g-3">
+      ${reviews
+        .map(
+          (item) => `
+      <div class="col-lg-4 col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <strong>${item.userName}</strong>
+              <span class="small text-warning">${"★".repeat(item.rating)}${"☆".repeat(5 - item.rating)}</span>
+            </div>
+            <h6 class="mt-2 mb-1">${item.title}</h6>
+            <p class="small text-muted mb-2">${item.content}</p>
+            <span class="badge text-bg-light">${item.scene}</span>
           </div>
-          <h6 class="mt-2 mb-1">${item.title}</h6>
-          <p class="small text-muted mb-2">${item.content}</p>
-          <span class="badge text-bg-light">${item.scene}</span>
         </div>
-      </div>
-    </div>`
-    )
-    .join("");
+      </div>`
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 async function analyzeAvatar() {
+  if (!dom.profileForm) return;
   const payload = formToPayload(dom.profileForm);
   payload.faceShapeHint = payload.faceShape;
   payload.skinToneHint = "neutral";
@@ -364,19 +388,22 @@ async function analyzeAvatar() {
     });
     if (!response.ok) throw new Error("avatar_insight_failed");
     const data = await response.json();
-    if (data.avatarImagePath) {
+    if (data.avatarImagePath && dom.avatarPreview) {
       dom.avatarPreview.src = data.avatarImagePath;
       dom.avatarPreview.classList.remove("d-none");
+      dom.avatarPreview.classList.remove("hidden");
     }
     const insight = data.insight || {};
-    dom.insightBox.innerHTML = `
-      <div><strong>检测脸型：</strong>${insight.detectedFaceShape || "-"}</div>
-      <div><strong>肤色倾向：</strong>${insight.detectedSkinTone || "-"}</div>
-      <div><strong>置信度：</strong>${Math.round(Number(insight.confidence || 0) * 100)}%</div>
-      <div><strong>推荐色系：</strong>${(insight.suggestedColorFamilies || []).join(", ")}</div>
-      <div><strong>建议场景：</strong>${(insight.suggestedScenes || []).join(", ")}</div>
-      <div class="small text-muted mt-2">${insight.notes || ""}</div>
-    `;
+    if (dom.insightBox) {
+      dom.insightBox.innerHTML = `
+        <div><strong>检测脸型：</strong>${insight.detectedFaceShape || "-"}</div>
+        <div><strong>肤色倾向：</strong>${insight.detectedSkinTone || "-"}</div>
+        <div><strong>置信度：</strong>${Math.round(Number(insight.confidence || 0) * 100)}%</div>
+        <div><strong>推荐色系：</strong>${(insight.suggestedColorFamilies || []).join(", ")}</div>
+        <div><strong>建议场景：</strong>${(insight.suggestedScenes || []).join(", ")}</div>
+        <div class="small text-muted mt-2">${insight.notes || ""}</div>
+      `;
+    }
     showToast("头像分析完成");
   } catch (error) {
     showToast("头像分析失败", "error");
@@ -388,6 +415,7 @@ async function analyzeAvatar() {
 
 async function generateRecommendations(event) {
   event.preventDefault();
+  if (!dom.profileForm) return;
   const payload = formToPayload(dom.profileForm);
   const submitBtn = dom.profileForm.querySelector('button[type="submit"]');
   setButtonLoading(submitBtn, true, "生成中...");
@@ -422,15 +450,16 @@ async function generateRecommendations(event) {
 }
 
 async function generateTryonImages() {
+  if (!dom.profileForm) return;
   const payload = {
     ...formToPayload(dom.profileForm),
     selectedProductIds: state.selectedProductIds,
-    useRealAi: dom.tryonUseRealAi.checked,
-    renderStyle: String(dom.renderStyleInput.value || ""),
-    imageSize: String(dom.tryonImageSize.value || "1024x1024"),
-    imageCount: Number(dom.imageCountInput.value || 3),
+    useRealAi: Boolean(dom.useRealAiToggle?.checked),
+    renderStyle: String(dom.tryonRenderStyle?.value || "photo-realistic studio"),
+    imageSize: String(dom.tryonImageSize?.value || "1024x1024"),
+    imageCount: Number(dom.tryonImageCount?.value || 3),
   };
-  setButtonLoading(dom.generateTryonImageBtn, true, "生成中...");
+  setButtonLoading(dom.generateTryonBtn, true, "生成中...");
   try {
     const response = await fetch("/api/ai/tryon-generate", {
       method: "POST",
@@ -440,25 +469,25 @@ async function generateTryonImages() {
     if (!response.ok) throw new Error("tryon_generate_failed");
     const data = await response.json();
     renderGeneratedImages(data.images || []);
-
-    const messages = [];
-    messages.push(`当前模式：${data.providerMode === "openai" ? "真实AI出图" : "Mock占位图"}`);
-    if (Array.isArray(data.warnings) && data.warnings.length) messages.push(data.warnings.join(" "));
-    if (Array.isArray(data.integrationTips) && data.integrationTips.length) messages.push(data.integrationTips[0]);
-    dom.imageGenerationNotice.textContent = messages.join(" | ");
+    if (dom.tryonWarnings) {
+      dom.tryonWarnings.textContent = (data.warnings || []).join(" | ");
+    }
+    if (dom.tryonIntegrationTips) {
+      dom.tryonIntegrationTips.textContent = (data.integrationTips || []).join(" ");
+    }
     showToast("试戴图片已生成");
   } catch (error) {
-    dom.imageGenerationNotice.textContent = "出图失败，请稍后重试。";
+    if (dom.tryonWarnings) dom.tryonWarnings.textContent = "出图失败，请稍后重试。";
     showToast("试戴出图失败", "error");
     console.error(error);
   } finally {
-    setButtonLoading(dom.generateTryonImageBtn, false);
+    setButtonLoading(dom.generateTryonBtn, false);
   }
 }
 
 async function previewCheckout() {
   if (!state.cart.length) {
-    dom.checkoutSummary.textContent = "购物车为空";
+    if (dom.checkoutSummary) dom.checkoutSummary.textContent = "购物车为空";
     return;
   }
   setButtonLoading(dom.checkoutPreviewBtn, true, "计算中...");
@@ -468,28 +497,33 @@ async function previewCheckout() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         items: state.cart.map((item) => ({ productId: item.productId, quantity: item.quantity })),
-        discountCode: String(dom.discountCodeInput.value || ""),
-        shippingMethod: String(dom.shippingMethodSelect.value || "standard"),
+        discountCode: String(dom.discountCodeInput?.value || ""),
+        shippingMethod: String(dom.shippingMethodSelect?.value || "standard"),
       }),
     });
     if (!response.ok) throw new Error("checkout_preview_failed");
     const data = await response.json();
     const pricing = data.pricing || {};
-    dom.checkoutSummary.innerHTML = `
-      <div><strong>小计：</strong>${formatCny(pricing.subtotalCny)}</div>
-      <div><strong>优惠：</strong>- ${formatCny(pricing.discountCny)}</div>
-      <div><strong>运费：</strong>${formatCny(pricing.shippingCny)}</div>
-      <div><strong>税费：</strong>${formatCny(pricing.taxCny)}</div>
-      <div class="fw-semibold"><strong>应付：</strong>${formatCny(pricing.totalCny)}</div>
-    `;
-    const notes = [];
-    if (data.couponApplied) notes.push(`已使用优惠码 ${data.couponApplied}`);
-    if ((data.stockAlerts || []).length) notes.push("部分商品数量已按库存自动调整");
-    if ((data.skippedItems || []).length) notes.push("部分商品不可用，已从结算中排除");
-    dom.checkoutNotice.textContent = notes.join("；");
+    if (dom.checkoutSummary) {
+      dom.checkoutSummary.innerHTML = `
+        <div><strong>小计：</strong>${formatCny(pricing.subtotalCny)}</div>
+        <div><strong>优惠：</strong>- ${formatCny(pricing.discountCny)}</div>
+        <div><strong>运费：</strong>${formatCny(pricing.shippingCny)}</div>
+        <div><strong>税费：</strong>${formatCny(pricing.taxCny)}</div>
+        <div class="fw-semibold"><strong>应付：</strong>${formatCny(pricing.totalCny)}</div>
+      `;
+    }
+    if (dom.checkoutNotice) {
+      const notes = [];
+      if (data.couponApplied) notes.push(`已使用优惠码 ${data.couponApplied}`);
+      if ((data.stockAlerts || []).length) notes.push("部分商品数量已按库存自动调整");
+      if ((data.skippedItems || []).length) notes.push("部分商品不可用，已从结算中排除");
+      dom.checkoutNotice.textContent = notes.join("；");
+    }
   } catch (error) {
-    dom.checkoutNotice.textContent = "结算预估失败";
+    if (dom.checkoutNotice) dom.checkoutNotice.textContent = "结算预估失败";
     showToast("结算预估失败", "error");
+    console.error(error);
   } finally {
     setButtonLoading(dom.checkoutPreviewBtn, false);
   }
@@ -497,6 +531,7 @@ async function previewCheckout() {
 
 async function submitNewsletter(event) {
   event.preventDefault();
+  if (!dom.newsletterForm) return;
   const submitBtn = dom.newsletterForm.querySelector('button[type="submit"]');
   setButtonLoading(submitBtn, true, "提交中...");
   try {
@@ -504,17 +539,19 @@ async function submitNewsletter(event) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: String(dom.newsletterEmail.value || "").trim(),
-        preference: String(dom.newsletterPreference.value || "new-arrivals"),
+        email: String(dom.newsletterEmail?.value || "").trim(),
+        preference: String(dom.newsletterPreference?.value || "new-arrivals"),
       }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "newsletter_failed");
-    dom.newsletterMessage.textContent = data.message || "订阅成功";
-    dom.newsletterEmail.value = "";
+    if (dom.newsletterMessage) dom.newsletterMessage.textContent = data.message || "订阅成功";
+    if (dom.newsletterEmail) dom.newsletterEmail.value = "";
     showToast("订阅成功");
   } catch (error) {
-    dom.newsletterMessage.textContent = error instanceof Error ? error.message : "订阅失败";
+    if (dom.newsletterMessage) {
+      dom.newsletterMessage.textContent = error instanceof Error ? error.message : "订阅失败";
+    }
     showToast("订阅失败", "error");
   } finally {
     setButtonLoading(submitBtn, false);
@@ -522,25 +559,35 @@ async function submitNewsletter(event) {
 }
 
 function bindEvents() {
-  dom.profileForm.addEventListener("submit", generateRecommendations);
-  dom.avatarAnalyzeBtn.addEventListener("click", analyzeAvatar);
-  dom.generateTryonImageBtn.addEventListener("click", generateTryonImages);
-  dom.checkoutPreviewBtn.addEventListener("click", previewCheckout);
-  dom.newsletterForm.addEventListener("submit", submitNewsletter);
+  dom.profileForm?.addEventListener("submit", generateRecommendations);
+  dom.avatarAnalyzeBtn?.addEventListener("click", analyzeAvatar);
+  dom.generateTryonBtn?.addEventListener("click", generateTryonImages);
+  dom.applyTryonSelectionBtn?.addEventListener("click", () => {
+    if (!state.selectedProductIds.length) {
+      showToast("请先生成推荐结果再出图", "warning");
+      return;
+    }
+    showToast(`已应用 ${state.selectedProductIds.length} 款推荐假发`);
+  });
+  dom.checkoutPreviewBtn?.addEventListener("click", previewCheckout);
+  dom.newsletterForm?.addEventListener("submit", submitNewsletter);
 
-  dom.avatarInput.addEventListener("change", (event) => {
+  dom.avatarInput?.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
       state.avatarBase64 = reader.result;
-      dom.avatarPreview.src = state.avatarBase64;
-      dom.avatarPreview.classList.remove("d-none");
+      if (dom.avatarPreview) {
+        dom.avatarPreview.src = state.avatarBase64;
+        dom.avatarPreview.classList.remove("d-none");
+        dom.avatarPreview.classList.remove("hidden");
+      }
     };
     reader.readAsDataURL(file);
   });
 
-  dom.recommendations.addEventListener("click", (event) => {
+  dom.recommendations?.addEventListener("click", (event) => {
     const btn = event.target.closest("button[data-action]");
     if (!btn) return;
     const action = btn.dataset.action;
@@ -549,7 +596,7 @@ function bindEvents() {
       addToCart(id);
     } else if (action === "quick-view") {
       const item = state.catalogById.get(String(id || "").toLowerCase());
-      if (!item) return;
+      if (!item || !dom.insightBox) return;
       dom.insightBox.innerHTML = `
         <div class="fw-semibold">${item.name}</div>
         <div class="small text-muted">${item.description}</div>
@@ -559,7 +606,7 @@ function bindEvents() {
     }
   });
 
-  dom.cartItems.addEventListener("click", (event) => {
+  dom.cartItems?.addEventListener("click", (event) => {
     const btn = event.target.closest("button[data-action]");
     if (!btn) return;
     if (btn.dataset.action === "cart-minus") changeCartQuantity(btn.dataset.id, -1);
@@ -568,36 +615,29 @@ function bindEvents() {
 
   document.querySelectorAll(".coupon-chip").forEach((button) => {
     button.addEventListener("click", () => {
-      dom.discountCodeInput.value = button.dataset.coupon || "";
+      if (dom.discountCodeInput) dom.discountCodeInput.value = button.dataset.coupon || "";
       showToast("优惠码已填入");
     });
   });
 
-  dom.searchInput.addEventListener("input", () => {
-    renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
-  });
-  dom.categoryFilter.addEventListener("change", () => {
-    renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
-  });
-  dom.sceneFilter.addEventListener("change", () => {
-    renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
-  });
-  dom.sortSelect.addEventListener("change", () => {
-    renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
-  });
-  dom.resetFilterBtn.addEventListener("click", () => {
-    dom.searchInput.value = "";
-    dom.categoryFilter.value = "";
-    dom.sceneFilter.value = "";
-    dom.sortSelect.value = "recommended";
-    renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
+  const refreshCatalog = () => renderCatalogCards(currentDisplayItems(), !state.recommendations.length);
+  dom.searchInput?.addEventListener("input", refreshCatalog);
+  dom.categoryFilter?.addEventListener("change", refreshCatalog);
+  dom.sceneFilter?.addEventListener("change", refreshCatalog);
+  dom.sortSelect?.addEventListener("change", refreshCatalog);
+  dom.resetFilterBtn?.addEventListener("click", () => {
+    if (dom.searchInput) dom.searchInput.value = "";
+    if (dom.categoryFilter) dom.categoryFilter.value = "";
+    if (dom.sceneFilter) dom.sceneFilter.value = "";
+    if (dom.sortSelect) dom.sortSelect.value = "recommended";
+    refreshCatalog();
   });
 
-  dom.cartToggleBtn.addEventListener("click", () => {
-    dom.cartPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  dom.cartToggleBtn?.addEventListener("click", () => {
+    dom.cartPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  dom.bookBtn.addEventListener("click", () => {
-    document.getElementById("ai-stylist").scrollIntoView({ behavior: "smooth", block: "start" });
+  dom.bookBtn?.addEventListener("click", () => {
+    document.getElementById("ai-stylist")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 
@@ -650,7 +690,7 @@ function init3dScene() {
   }
   animate();
 
-  dom.switchWigColorBtn.addEventListener("click", () => {
+  dom.switchWigColorBtn?.addEventListener("click", () => {
     state.wigColorIndex = (state.wigColorIndex + 1) % wigColors.length;
     wig.material.color.setHex(wigColors[state.wigColorIndex]);
     bangs.material.color.setHex(wigColors[state.wigColorIndex]);
@@ -671,4 +711,3 @@ boot().catch((error) => {
   console.error(error);
   showToast("页面初始化失败", "error");
 });
-
