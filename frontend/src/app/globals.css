@@ -1,14 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #0a0f1d;
-  --bg-surface: #0f1629;
-  --bg-card: #121b31;
-  --bg-hover: #1a2544;
-  --text-main: #f4f7fe;
-  --text-muted: #96a6c8;
-  --border-main: #223154;
-  --border-soft: #1a2744;
+  --bg-main: #070b16;
+  --bg-surface: #0c1428;
+  --bg-panel: #0f1931;
+  --bg-card: #121f3d;
+  --bg-hover: #1a2a52;
+  --surface: #12203d;
+  --surface-hover: #1a2d54;
+  --text-main: #eef4ff;
+  --text-muted: #8ca0c7;
+  --border-main: #22365e;
+  --border-soft: #1a2a4e;
+  --border: #22365e;
+  --accent: #4f8cff;
+  --accent-blue: #4f8cff;
+  --danger: #ff6b7d;
   --up: #22c55e;
   --down: #ef4444;
   --boom: #f97316;
@@ -32,25 +39,54 @@ body {
 }
 
 body {
-  background: var(--bg-main);
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(79, 140, 255, 0.2), transparent 55%),
+    radial-gradient(1000px 450px at 90% -20%, rgba(152, 88, 255, 0.18), transparent 50%),
+    var(--bg-main);
   color: var(--text-main);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 .card {
-  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
   padding: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-main);
-  box-shadow: 0 4px 14px rgba(4, 8, 18, 0.22);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-card) 92%, #ffffff 8%),
+    var(--bg-card)
+  );
+  border: 1px solid color-mix(in srgb, var(--border-main) 88%, #6ea0ff 12%);
+  box-shadow:
+    0 14px 40px rgba(2, 8, 20, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    125deg,
+    rgba(79, 140, 255, 0.09),
+    rgba(160, 96, 255, 0.05) 35%,
+    transparent 60%
+  );
 }
 
 .card:hover {
-  background: var(--bg-hover);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-main) 60%);
+  box-shadow:
+    0 18px 48px rgba(2, 8, 20, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .panel {
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--bg-surface);
   border: 1px solid var(--border-soft);
 }
@@ -85,4 +121,19 @@ body {
 .tag-profit {
   background: color-mix(in srgb, var(--high-profit) 22%, transparent);
   color: #edd7ff;
+}
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(18, 31, 61, 0.86), rgba(15, 25, 49, 0.86));
+  border: 1px solid color-mix(in srgb, var(--border-main) 80%, #6ea0ff 20%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 34px rgba(0, 0, 0, 0.35);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #8ab5ff, #7de6d6 45%, #d4a6ff 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

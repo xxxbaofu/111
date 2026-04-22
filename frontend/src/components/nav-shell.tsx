@@ -45,20 +45,23 @@ export function NavShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)]">
       <div className="mx-auto grid max-w-[1460px] grid-cols-12 gap-4 px-4 py-4">
-        <aside className="col-span-12 rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 md:col-span-3 lg:col-span-2">
-          <h1 className="mb-1 text-sm font-semibold tracking-wide text-[var(--text-main)]">
-            跨境赚钱操作系统
-          </h1>
-          <p className="mb-4 text-xs text-[var(--text-muted)]">少数据，多结论：30秒看今天做什么</p>
+        <aside className="glass-panel col-span-12 rounded-2xl p-4 md:col-span-3 lg:col-span-2">
+          <div className="relative mb-4 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[radial-gradient(circle,rgba(101,116,255,.35),transparent_65%)]" />
+            <h1 className="mb-1 text-sm font-semibold tracking-wide text-[var(--text-main)]">
+              跨境赚钱操作系统
+            </h1>
+            <p className="text-xs text-[var(--text-muted)]">少数据，多结论：30秒看今天做什么</p>
+          </div>
 
-          <div className="mb-4 rounded-lg border border-white/10 bg-white/5 p-2">
+          <div className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] p-2">
             <div className="mb-2 text-xs text-[var(--text-muted)]">快速切换区域</div>
             <div className="grid grid-cols-4 gap-1">
               {REGION_OPTIONS.map((region) => (
                 <Link
                   key={region}
                   href={withRegion(pathname, region)}
-                  className="rounded-md border border-white/15 px-1 py-1 text-center text-[10px] text-[var(--text-muted)] hover:border-white/30 hover:text-white"
+                  className="rounded-md border border-white/15 px-1 py-1 text-center text-[10px] text-[var(--text-muted)] transition hover:border-white/30 hover:bg-white/[0.06] hover:text-white"
                 >
                   {region}
                 </Link>
@@ -73,12 +76,15 @@ export function NavShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={withRegion(item.href, "US")}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
+                  className={`relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
                     active
-                      ? "bg-[var(--bg-hover)] text-white"
-                      : "text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-white"
+                      ? "bg-[linear-gradient(135deg,rgba(97,109,255,0.25),rgba(55,187,255,0.16))] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]"
+                      : "text-[var(--text-muted)] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
+                  {active ? (
+                    <span className="absolute left-1 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-[var(--accent-blue)]" />
+                  ) : null}
                   {item.icon}
                   {item.label}
                 </Link>
@@ -87,7 +93,7 @@ export function NavShell({ children }: { children: ReactNode }) {
           </nav>
         </aside>
         <main className="col-span-12 md:col-span-9 lg:col-span-10">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-panel)] p-4 md:p-5">
+          <div className="glass-panel rounded-2xl p-4 md:p-5">
             {children}
           </div>
         </main>

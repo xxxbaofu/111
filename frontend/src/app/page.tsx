@@ -41,10 +41,17 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-white/10 bg-white/5 p-4">
-        <h1 className="text-xl font-semibold text-white">跨境赚钱操作系统（私人版）</h1>
-        <p className="mt-2 text-sm text-[var(--text-muted)]">
-          少数据、多结论：打开 30 秒内，知道今天看什么、测什么、投多少钱。
+      <section className="card relative overflow-hidden">
+        <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-[radial-gradient(circle,_rgba(91,141,255,0.35)_0%,_rgba(91,141,255,0)_70%)]" />
+        <div className="pointer-events-none absolute -bottom-8 left-10 h-28 w-28 rounded-full bg-[radial-gradient(circle,_rgba(39,213,170,0.2)_0%,_rgba(39,213,170,0)_70%)]" />
+        <h1 className="text-xl font-semibold text-white md:text-2xl">
+          跨境赚钱操作系统（私人版）
+          <span className="ml-2 rounded-full border border-[var(--border-main)] bg-white/5 px-2 py-0.5 text-xs text-[var(--text-muted)]">
+            Data OS v0.3
+          </span>
+        </h1>
+        <p className="mt-2 max-w-3xl text-sm text-[var(--text-muted)]">
+          少数据、多结论：打开 30 秒内，知道今天看什么、测什么、投多少钱。新增收藏、日报与预算模拟，形成完整执行闭环。
         </p>
       </section>
 
