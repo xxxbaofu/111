@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import base64
+import html
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -16,7 +18,9 @@ BASE_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 UPLOAD_DIR = STATIC_DIR / "uploads"
+GENERATED_DIR = STATIC_DIR / "generated"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+GENERATED_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__, template_folder=str(TEMPLATE_DIR), static_folder=str(STATIC_DIR))
 engine = WigAIEngine(get_catalog())
@@ -74,6 +78,69 @@ def _save_avatar_image(image_base64: str | None) -> str | None:
     target = UPLOAD_DIR / filename
     target.write_bytes(raw)
     return f"/static/uploads/{filename}"
+
+
+def _is_openai_image_enabled(request_value: object | None = None) -> bool:
+    if request_value is True:
+        return True
+    env_value = str(os.getenv("WIGVERSE_ENABLE_OPENAI_IMAGE", "false")).strip().lower()
+    return env_value in {"1", "true", "yes", "on"}
+
+
+def _generate_mock_tryon_image(scene: str, prompt: str) -> str:
+    """Create a deterministic placeholder image for try-on pipelines."""
+    safe_scene = "".join(ch for ch in scene.lower() if ch.isalnum() or ch in {"-", "_"})
+    safe_scene = safe_scene or "scene"
+    filename = f"tryon-{safe_scene}-{uuid4().hex[:10]}.svg"
+    target = GENERATED_DIR / filename
+    escaped_prompt = html.escape(prompt[:140])
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#2B1B5B" />
+    <stop offset="100%" stop-color="#6C2BD9" />
+  </linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="url(#bg)" />
+<circle cx="512" cy="420" r="220" fill="#F5D9C5" />
+<ellipse cx="512" cy="330" rx="250" ry="170" fill="#D266FF" opacity="0.84" />
+<rect x="170" y="700" width="684" height="180" rx="28" fill="#120E24" opacity="0.65" />
+<text x="210" y="770" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="700">AI Try-On Preview</text>
+<text x="210" y="820" fill="#EEDCFF" font-family="Inter, Arial, sans-serif" font-size="26">Scene: {html.escape(scene)}</text>
+<text x="210" y="860" fill="#D9C6FF" font-family="Inter, Arial, sans-serif" font-size="18">{escaped_prompt}</text>
+</svg>"""
+    target.write_text(svg, encoding="utf-8")
+    return f"/static/generated/{filename}"
+
+
+def _generate_openai_tryon_image(prompt: str, size: str, scene: str) -> tuple[str | None, str | None]:
+    """Try generating try-on image with OpenAI; return (url, error_message)."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None, "OPENAI_API_KEY is not configured"
+
+    try:
+        from openai import OpenAI
+
+        client = OpenAI(api_key=api_key)
+        model = os.getenv("WIGVERSE_OPENAI_IMAGE_MODEL", "gpt-image-1")
+        result = client.images.generate(model=model, prompt=prompt, size=size)
+        image_data = result.data[0]
+        image_url = getattr(image_data, "url", None)
+        if image_url:
+            return str(image_url), None
+
+        b64_payload = getattr(image_data, "b64_json", None)
+        if b64_payload:
+            raw = base64.b64decode(b64_payload)
+            safe_scene = "".join(ch for ch in scene.lower() if ch.isalnum() or ch in {"-", "_"})
+            filename = f"tryon-openai-{safe_scene or 'scene'}-{uuid4().hex[:10]}.png"
+            target = GENERATED_DIR / filename
+            target.write_bytes(raw)
+            return f"/static/generated/{filename}", None
+        return None, "OpenAI returned empty image payload"
+    except Exception as exc:  # pragma: no cover - network/provider failures are runtime dependent
+        return None, str(exc)
 
 
 def _build_profile(data: dict[str, object]) -> UserProfile:
@@ -340,6 +407,65 @@ def newsletter_subscribe() -> object:
         }
     )
     return jsonify({"ok": True, "message": "订阅成功，首单优惠已发送到你的邮箱。"})
+
+
+@app.post("/api/ai/tryon-generate")
+def tryon_generate() -> object:
+    """Generate try-on images (OpenAI when enabled, mock fallback otherwise)."""
+    data = request.get_json(silent=True) or {}
+    profile = _build_profile(data)
+    selected_ids = _safe_list(data.get("selectedProductIds"))
+    plans = engine.plan_tryon_scenarios(profile=profile, selected_ids=selected_ids)
+    if not plans:
+        return jsonify({"images": [], "providerMode": "mock", "warnings": ["No try-on plans available."]})
+
+    image_count = _to_int(data.get("imageCount"), 3)
+    image_count = max(1, min(image_count, 4))
+    render_style = str(data.get("renderStyle", "photo-realistic studio")).strip() or "photo-realistic studio"
+    image_size = str(data.get("imageSize", "1024x1024")).strip() or "1024x1024"
+    use_openai = _is_openai_image_enabled(data.get("useRealAi"))
+
+    warnings: list[str] = []
+    images = []
+    for plan in plans[:image_count]:
+        enriched_prompt = (
+            f"{plan.generation_prompt} Render style: {render_style}. "
+            "Generate e-commerce quality try-on image with clear wig texture details."
+        )
+        provider = "mock"
+        image_url = None
+        if use_openai:
+            image_url, err = _generate_openai_tryon_image(
+                prompt=enriched_prompt, size=image_size, scene=plan.scene
+            )
+            if image_url:
+                provider = "openai"
+            elif err:
+                warnings.append(f"OpenAI fallback for scene '{plan.scene}': {err}")
+        if not image_url:
+            image_url = _generate_mock_tryon_image(plan.scene, enriched_prompt)
+
+        images.append(
+            {
+                "scene": plan.scene,
+                "prompt": enriched_prompt,
+                "imageUrl": image_url,
+                "provider": provider,
+                "recommendedProductIds": plan.recommended_product_ids,
+            }
+        )
+
+    return jsonify(
+        {
+            "images": images,
+            "providerMode": "openai" if use_openai else "mock",
+            "warnings": warnings,
+            "integrationTips": [
+                "Set OPENAI_API_KEY and WIGVERSE_ENABLE_OPENAI_IMAGE=true to enable real image generation.",
+                "Use WIGVERSE_OPENAI_IMAGE_MODEL to switch image model, default is gpt-image-1.",
+            ],
+        }
+    )
 
 
 if __name__ == "__main__":

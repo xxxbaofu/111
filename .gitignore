@@ -6,3 +6,4 @@ __pycache__/
 selection_radar.db
 output/
 wig_ai_studio/static/uploads/
+wig_ai_studio/static/generated/

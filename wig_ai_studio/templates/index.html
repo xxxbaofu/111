@@ -3,270 +3,354 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WigVerse AI - 假发独立站</title>
+    <title>WigVerse AI - Smart Wig Storefront</title>
     <meta
       name="description"
-      content="WigVerse AI 独立站：3D试戴、AI推荐、头围匹配、cosplay选款、购物车结算和会员订阅。"
+      content="WigVerse AI 独立站：3D演示、AI选款、试戴出图、购物车结算与会员订阅。"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
   </head>
-  <body>
-    <div class="announcement-bar">
-      <p>新客礼遇：输入优惠码 <strong>WIG10</strong> 立减10%，全场满599免标准运费。</p>
+  <body class="bg-dark text-light">
+    <div class="top-banner text-center py-2">
+      新客专享：使用 <strong>WIG10</strong> 立减10%，满599包邮
     </div>
 
-    <header class="site-header">
-      <div class="container nav-row">
-        <a class="brand" href="#">
-          <span class="brand-dot"></span>
-          <span class="brand-text">WigVerse AI</span>
-        </a>
-        <nav class="main-nav">
-          <a href="#shop">商城</a>
-          <a href="#ai-stylist">AI发型师</a>
-          <a href="#reviews">用户口碑</a>
-          <a href="#newsletter">会员订阅</a>
-        </nav>
-        <div class="nav-actions">
-          <button id="bookBtn" class="btn btn-secondary">预约顾问</button>
-          <button id="cartToggleBtn" class="btn btn-primary">
-            购物车
-            <span id="cartBadge" class="count-badge">0</span>
-          </button>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top border-bottom border-secondary-subtle">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="#">WigVerse AI</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+          aria-controls="mainNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link" href="#shop">商城</a></li>
+            <li class="nav-item"><a class="nav-link" href="#ai-stylist">AI发型师</a></li>
+            <li class="nav-item"><a class="nav-link" href="#tryon-lab">试戴出图</a></li>
+            <li class="nav-item"><a class="nav-link" href="#reviews">用户口碑</a></li>
+          </ul>
+          <div class="d-flex gap-2">
+            <button id="bookBtn" class="btn btn-outline-light btn-sm">预约顾问</button>
+            <button id="cartToggleBtn" class="btn btn-primary btn-sm">
+              购物车 <span id="cartBadge" class="badge bg-light text-dark">0</span>
+            </button>
+          </div>
         </div>
       </div>
-    </header>
+    </nav>
 
-    <main>
-      <section class="hero container">
-        <div class="hero-copy">
-          <p class="badge">AI + 3D + 独立站购物体验</p>
-          <h1>一站式假发选购：试戴、推荐、下单都在这里</h1>
-          <p class="subtitle">
-            为日常通勤、婚礼、舞台和 cosplay 用户设计。AI 会基于头像与头围参数推荐更合适的款式，并生成多场景试戴计划。
-          </p>
-          <div class="hero-actions">
-            <a href="#ai-stylist" class="btn btn-primary">开始智能试戴</a>
-            <a href="#shop" class="btn btn-secondary">进入商城</a>
-          </div>
-          <div class="hero-metrics">
-            <div class="metric">
-              <span class="metric-value" id="metricProducts">--</span>
-              <span class="metric-label">在售款式</span>
+    <main class="container py-4">
+      <section class="row g-4 align-items-stretch mb-4">
+        <div class="col-lg-6">
+          <div class="hero-card h-100 p-4 rounded-4">
+            <p class="text-uppercase small fw-semibold text-info mb-2">AI + 3D + 试戴出图</p>
+            <h1 class="display-6 fw-bold mb-3">更清晰、更快决策的假发独立站体验</h1>
+            <p class="text-secondary-emphasis mb-4">
+              通过头像洞察、头围匹配、场景化推荐和 AI 试戴图片生成，帮助用户快速选到适合自己的日常与 cosplay 假发。
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+              <a class="btn btn-primary" href="#ai-stylist">开始智能选款</a>
+              <a class="btn btn-outline-light" href="#tryon-lab">去试戴出图</a>
             </div>
-            <div class="metric">
-              <span class="metric-value" id="metricRating">--</span>
-              <span class="metric-label">用户均分</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value" id="metricCosplay">--</span>
-              <span class="metric-label">Cosplay占比</span>
+            <div class="row g-2">
+              <div class="col-4">
+                <div class="metric-box p-2 rounded-3">
+                  <div class="fw-bold fs-4" id="metricProducts">--</div>
+                  <small class="text-muted">在售款</small>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="metric-box p-2 rounded-3">
+                  <div class="fw-bold fs-4" id="metricRating">--</div>
+                  <small class="text-muted">均分</small>
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="metric-box p-2 rounded-3">
+                  <div class="fw-bold fs-4" id="metricCosplay">--</div>
+                  <small class="text-muted">Cos占比</small>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="hero-visual" id="demo">
-          <canvas id="wig3dCanvas" aria-label="3D假发演示"></canvas>
-          <div class="canvas-hud">
-            <span>3D Wig Preview</span>
-            <button id="switchWigColorBtn" class="chip">切换发色</button>
+        <div class="col-lg-6">
+          <div class="hero-visual rounded-4 border border-secondary-subtle h-100 position-relative">
+            <canvas id="wig3dCanvas" aria-label="3D假发演示"></canvas>
+            <div class="position-absolute bottom-0 start-0 end-0 p-3">
+              <div class="d-flex justify-content-between align-items-center glass-bar rounded-3 p-2">
+                <span class="small">3D Wig Preview</span>
+                <button id="switchWigColorBtn" class="btn btn-sm btn-outline-light">切换发色</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="container brand-strip">
-        <div class="strip-item">30天无忧换款</div>
-        <div class="strip-item">AI头围匹配引擎</div>
-        <div class="strip-item">全国包邮（满额）</div>
-        <div class="strip-item">7x12小时顾问支持</div>
+      <section id="shop" class="card bg-body-tertiary border-secondary-subtle mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+              <h2 class="h4 mb-1">Wig 商城</h2>
+              <p class="text-muted mb-0">套用电商模板式布局，信息更清晰，筛选更直观。</p>
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-lg-4">
+              <input id="searchInput" type="text" class="form-control" placeholder="搜索款式 / 色系 / 风格..." />
+            </div>
+            <div class="col-lg-2">
+              <select id="categoryFilter" class="form-select">
+                <option value="">全部分类</option>
+                <option value="daily">daily</option>
+                <option value="fashion">fashion</option>
+                <option value="cosplay">cosplay</option>
+                <option value="party">party</option>
+                <option value="bridal">bridal</option>
+              </select>
+            </div>
+            <div class="col-lg-2">
+              <select id="sceneFilter" class="form-select">
+                <option value="">全部场景</option>
+                <option value="daily">daily</option>
+                <option value="office">office</option>
+                <option value="cosplay">cosplay</option>
+                <option value="stage">stage</option>
+                <option value="date">date</option>
+              </select>
+            </div>
+            <div class="col-lg-2">
+              <select id="sortSelect" class="form-select">
+                <option value="recommended">默认推荐</option>
+                <option value="price-asc">价格从低到高</option>
+                <option value="price-desc">价格从高到低</option>
+                <option value="rating-desc">评分最高优先</option>
+              </select>
+            </div>
+            <div class="col-lg-2 d-grid">
+              <button id="resetFilterBtn" class="btn btn-outline-secondary">重置</button>
+            </div>
+          </div>
+          <p id="resultMeta" class="small text-muted mb-3">正在加载商品...</p>
+          <div id="recommendations" class="cards"></div>
+        </div>
       </section>
 
-      <section class="container panel" id="shop">
-        <div class="section-head">
-          <h2>Wig 商城</h2>
-          <p>筛选、排序、加购与结算预估，打造独立站电商体验。</p>
-        </div>
-        <div class="shop-controls">
-          <input id="searchInput" type="text" placeholder="搜索款式 / 色系 / 风格..." />
-          <select id="categoryFilter">
-            <option value="">全部分类</option>
-            <option value="daily">daily</option>
-            <option value="fashion">fashion</option>
-            <option value="cosplay">cosplay</option>
-            <option value="party">party</option>
-            <option value="bridal">bridal</option>
-          </select>
-          <select id="sceneFilter">
-            <option value="">全部场景</option>
-            <option value="daily">daily</option>
-            <option value="office">office</option>
-            <option value="cosplay">cosplay</option>
-            <option value="stage">stage</option>
-            <option value="date">date</option>
-          </select>
-          <select id="sortSelect">
-            <option value="recommended">默认推荐</option>
-            <option value="price-asc">价格从低到高</option>
-            <option value="price-desc">价格从高到低</option>
-            <option value="rating-desc">评分最高优先</option>
-          </select>
-          <button id="resetFilterBtn" class="btn btn-secondary">重置</button>
-        </div>
-        <p id="resultMeta" class="inline-tip">正在加载商品...</p>
-        <div id="recommendations" class="cards"></div>
-      </section>
-
-      <section class="container panel split" id="ai-stylist">
-        <div>
-          <div class="section-head">
-            <h2>AI 发型师</h2>
-            <p>上传头像并填写参数，获得个性化推荐与试戴计划。</p>
+      <section id="ai-stylist" class="row g-4 mb-4">
+        <div class="col-lg-7">
+          <div class="card bg-body-tertiary border-secondary-subtle h-100">
+            <div class="card-body">
+              <h2 class="h4 mb-1">AI 发型师</h2>
+              <p class="text-muted mb-3">上传头像与参数，输出可解释推荐结果。</p>
+              <form id="profileForm">
+                <div class="mb-3">
+                  <label class="form-label">头像（仅用于分析）</label>
+                  <input type="file" id="avatarInput" accept="image/*" class="form-control" />
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label">头围(cm)</label>
+                    <input type="number" name="headCircumferenceCm" min="50" max="64" value="56" class="form-control" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">脸型</label>
+                    <select name="faceShape" class="form-select">
+                      <option value="oval">椭圆</option>
+                      <option value="round">圆脸</option>
+                      <option value="square">方脸</option>
+                      <option value="heart">心形</option>
+                      <option value="diamond">菱形</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label">预算下限(¥)</label>
+                    <input type="number" name="budgetMin" min="100" max="3000" value="300" class="form-control" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">预算上限(¥)</label>
+                    <input type="number" name="budgetMax" min="200" max="5000" value="1200" class="form-control" />
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">目标场景（英文逗号分隔）</label>
+                  <input type="text" name="targetScenes" value="daily,photo-shoot" class="form-control" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">偏好发型（如 bob,long-wave,twin-tail）</label>
+                  <input type="text" name="preferredStyles" value="bob,long-wave" class="form-control" />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">偏好色系（如 brown,pink,blue,black）</label>
+                  <input type="text" name="preferredColors" value="brown,black" class="form-control" />
+                </div>
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">舒适度优先级(1-10)</label>
+                    <input type="range" name="comfortPriority" min="1" max="10" value="8" class="form-range" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">打理容忍度(1-10)</label>
+                    <input type="range" name="maintenanceTolerance" min="1" max="10" value="5" class="form-range" />
+                  </div>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" name="wantsCosplay" class="form-check-input" id="wantsCosplay" />
+                  <label for="wantsCosplay" class="form-check-label">主要用于 cosplay / 漫展</label>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" id="avatarAnalyzeBtn" class="btn btn-outline-primary">AI分析头像</button>
+                  <button type="submit" class="btn btn-primary">生成推荐</button>
+                </div>
+              </form>
+            </div>
           </div>
-          <form id="profileForm" class="form-card">
-            <label>
-              头像（用于分析，不公开）
-              <input type="file" id="avatarInput" accept="image/*" />
-            </label>
-            <div class="row">
-              <label>
-                头围 (cm)
-                <input type="number" name="headCircumferenceCm" min="50" max="64" value="56" />
-              </label>
-              <label>
-                脸型
-                <select name="faceShape">
-                  <option value="oval">椭圆</option>
-                  <option value="round">圆脸</option>
-                  <option value="square">方脸</option>
-                  <option value="heart">心形</option>
-                  <option value="diamond">菱形</option>
-                </select>
-              </label>
-            </div>
-            <div class="row">
-              <label>
-                预算下限 (¥)
-                <input type="number" name="budgetMin" min="100" max="3000" value="300" />
-              </label>
-              <label>
-                预算上限 (¥)
-                <input type="number" name="budgetMax" min="200" max="5000" value="1200" />
-              </label>
-            </div>
-            <label>
-              目标场景（英文逗号分隔）
-              <input type="text" name="targetScenes" value="daily,photo-shoot" />
-            </label>
-            <label>
-              偏好发型（如 bob,long-wave,twin-tail）
-              <input type="text" name="preferredStyles" value="bob,long-wave" />
-            </label>
-            <label>
-              偏好色系（如 brown,pink,blue,black）
-              <input type="text" name="preferredColors" value="brown,black" />
-            </label>
-            <div class="row">
-              <label>
-                舒适度优先级 (1-10)
-                <input type="range" name="comfortPriority" min="1" max="10" value="8" />
-              </label>
-              <label>
-                打理容忍度 (1-10)
-                <input type="range" name="maintenanceTolerance" min="1" max="10" value="5" />
-              </label>
-            </div>
-            <label class="inline">
-              <input type="checkbox" name="wantsCosplay" />
-              主要用于 cosplay / 漫展
-            </label>
-            <div class="form-actions">
-              <button type="button" id="avatarAnalyzeBtn" class="btn btn-secondary">AI分析头像</button>
-              <button type="submit" class="btn btn-primary">生成推荐</button>
-            </div>
-          </form>
         </div>
-
-        <aside>
-          <div class="insight-card">
-            <h3>AI 头像洞察</h3>
-            <img id="avatarPreview" alt="头像预览" class="avatar-preview hidden" />
-            <div id="insightBox" class="info-box">等待你上传头像并点击“AI分析头像”。</div>
-            <h4>多场景试戴计划</h4>
-            <div id="tryonPlans" class="plans"></div>
-          </div>
-          <div class="insight-card cart-card" id="cartPanel">
-            <h3>购物车与预估结算</h3>
-            <div id="cartItems" class="cart-items"></div>
-            <label>
-              优惠码
-              <input id="discountCodeInput" type="text" placeholder="如 WIG10" />
-            </label>
-            <div class="coupon-row">
-              <button type="button" class="chip coupon-chip" data-coupon="WIG10">使用 WIG10</button>
-              <button type="button" class="chip coupon-chip" data-coupon="COSPLAY88">使用 COSPLAY88</button>
+        <div class="col-lg-5">
+          <div class="card bg-body-tertiary border-secondary-subtle mb-3">
+            <div class="card-body">
+              <h3 class="h5">AI 头像洞察</h3>
+              <img id="avatarPreview" alt="头像预览" class="avatar-preview hidden mb-2" />
+              <div id="insightBox" class="small text-muted">等待你上传头像并点击“AI分析头像”。</div>
+              <hr />
+              <h4 class="h6">多场景试戴计划</h4>
+              <div id="tryonPlans" class="plans"></div>
             </div>
-            <label>
-              配送方式
-              <select id="shippingMethodSelect">
+          </div>
+          <div class="card bg-body-tertiary border-secondary-subtle" id="cartPanel">
+            <div class="card-body">
+              <h3 class="h5">购物车与预估结算</h3>
+              <div id="cartItems" class="cart-items"></div>
+              <label class="form-label mt-2">优惠码</label>
+              <input id="discountCodeInput" type="text" class="form-control mb-2" placeholder="如 WIG10" />
+              <div class="d-flex gap-2 flex-wrap mb-2">
+                <button type="button" class="btn btn-sm btn-outline-info coupon-chip" data-coupon="WIG10">
+                  使用 WIG10
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info coupon-chip" data-coupon="COSPLAY88">
+                  使用 COSPLAY88
+                </button>
+              </div>
+              <label class="form-label">配送方式</label>
+              <select id="shippingMethodSelect" class="form-select mb-2">
                 <option value="standard">标准配送</option>
                 <option value="express">加急配送</option>
               </select>
-            </label>
-            <button id="checkoutPreviewBtn" type="button" class="btn btn-primary">预估结算</button>
-            <div id="checkoutSummary" class="info-box">购物车为空。</div>
-            <div id="checkoutNotice" class="inline-tip"></div>
+              <button id="checkoutPreviewBtn" type="button" class="btn btn-primary w-100 mb-2">预估结算</button>
+              <div id="checkoutSummary" class="small text-muted">购物车为空。</div>
+              <div id="checkoutNotice" class="small text-warning mt-2"></div>
+            </div>
           </div>
-        </aside>
+        </div>
       </section>
 
-      <section class="container panel" id="reviews">
-        <div class="section-head">
-          <h2>用户口碑</h2>
-          <p>真实用户的场景反馈，帮助你更快决策。</p>
+      <section id="tryon-lab" class="card bg-body-tertiary border-secondary-subtle mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+            <div>
+              <h2 class="h4 mb-1">AI 试戴出图工作台</h2>
+              <p class="text-muted mb-0">当前支持 Mock 出图；打开配置后可直连真实 AI 图像模型。</p>
+            </div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-md-3">
+              <label class="form-label">生成张数</label>
+              <select id="tryonImageCount" class="form-select">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">风格</label>
+              <input
+                id="tryonRenderStyle"
+                class="form-control"
+                type="text"
+                value="photo-realistic studio"
+                placeholder="photo-realistic studio"
+              />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">尺寸</label>
+              <select id="tryonImageSize" class="form-select">
+                <option value="1024x1024" selected>1024x1024</option>
+                <option value="1024x1536">1024x1536</option>
+                <option value="1536x1024">1536x1024</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="useRealAiToggle" />
+                <label class="form-check-label" for="useRealAiToggle">启用真实AI</label>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button id="generateTryonBtn" class="btn btn-primary">生成试戴图</button>
+            <button id="applyTryonSelectionBtn" class="btn btn-outline-secondary">使用推荐款出图</button>
+          </div>
+          <div id="tryonWarnings" class="small text-warning mb-2"></div>
+          <div id="tryonIntegrationTips" class="small text-muted mb-3"></div>
+          <div id="tryonGallery" class="tryon-gallery"></div>
         </div>
-        <div id="reviewList" class="review-grid"></div>
       </section>
 
-      <section class="container panel" id="newsletter">
-        <div class="section-head">
-          <h2>会员订阅</h2>
-          <p>接收新品上架、促销和 AI 发型趋势报告。</p>
+      <section id="reviews" class="card bg-body-tertiary border-secondary-subtle mb-4">
+        <div class="card-body">
+          <h2 class="h4 mb-1">用户口碑</h2>
+          <p class="text-muted mb-3">真实用户的场景反馈，帮助快速决策。</p>
+          <div id="reviewList" class="review-grid"></div>
         </div>
-        <form id="newsletterForm" class="newsletter-form">
-          <input id="newsletterEmail" type="email" placeholder="输入你的邮箱地址" required />
-          <select id="newsletterPreference">
-            <option value="new-arrivals">新品上新</option>
-            <option value="cosplay">cosplay专题</option>
-            <option value="daily-style">日常佩戴指南</option>
-          </select>
-          <button class="btn btn-primary" type="submit">立即订阅</button>
-        </form>
-        <div id="newsletterMessage" class="inline-tip"></div>
+      </section>
+
+      <section id="newsletter" class="card bg-body-tertiary border-secondary-subtle">
+        <div class="card-body">
+          <h2 class="h4 mb-1">会员订阅</h2>
+          <p class="text-muted mb-3">接收新品上架、促销和 AI 发型趋势报告。</p>
+          <form id="newsletterForm" class="row g-2">
+            <div class="col-md-6">
+              <input id="newsletterEmail" type="email" class="form-control" placeholder="输入你的邮箱地址" required />
+            </div>
+            <div class="col-md-3">
+              <select id="newsletterPreference" class="form-select">
+                <option value="new-arrivals">新品上新</option>
+                <option value="cosplay">cosplay专题</option>
+                <option value="daily-style">日常佩戴指南</option>
+              </select>
+            </div>
+            <div class="col-md-3 d-grid">
+              <button class="btn btn-primary" type="submit">立即订阅</button>
+            </div>
+          </form>
+          <div id="newsletterMessage" class="small text-info mt-2"></div>
+        </div>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="container footer-row">
-        <div>
-          <strong>WigVerse AI</strong>
-          <p>让每一次假发选择都精准、可解释、可视化。</p>
-        </div>
-        <div class="footer-links">
-          <a href="#shop">商城</a>
-          <a href="#ai-stylist">AI选款</a>
-          <a href="#reviews">口碑评价</a>
-          <a href="#newsletter">会员订阅</a>
-        </div>
+    <footer class="py-4 mt-4 border-top border-secondary-subtle">
+      <div class="container d-flex justify-content-between flex-wrap gap-2 text-muted small">
+        <span>© WigVerse AI</span>
+        <span>AI Try-On · Smart Recommendation · Standalone Storefront</span>
       </div>
     </footer>
 
     <div id="toast" class="toast"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/three@0.162.0/build/three.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   </body>

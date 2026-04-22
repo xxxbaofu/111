@@ -63,3 +63,28 @@ def test_newsletter_subscribe_rejects_bad_preference() -> None:
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["ok"] is False
+
+
+def test_tryon_generate_endpoint_mock_mode() -> None:
+    client = app.test_client()
+    response = client.post(
+        "/api/ai/tryon-generate",
+        json={
+            "headCircumferenceCm": 56,
+            "faceShape": "oval",
+            "budgetMin": 300,
+            "budgetMax": 1200,
+            "targetScenes": ["daily", "cosplay"],
+            "preferredStyles": ["bob"],
+            "preferredColors": ["brown"],
+            "selectedProductIds": ["WIG-001"],
+            "imageCount": 2,
+            "renderStyle": "studio beauty campaign",
+        },
+    )
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["providerMode"] in {"mock", "openai"}
+    assert isinstance(payload["images"], list)
+    assert len(payload["images"]) >= 1
+    assert payload["images"][0]["imageUrl"]
