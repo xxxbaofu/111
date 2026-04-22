@@ -12,20 +12,21 @@
 }
 
 .top-banner {
-  background: linear-gradient(90deg, #452a82, #7b42d8);
-  color: #efe6ff;
+  background: linear-gradient(90deg, #261a47, #3b2a72);
+  color: #e7dbff;
   font-size: 0.86rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .navbar {
-  background: rgba(23, 16, 44, 0.85);
+  background: rgba(18, 16, 32, 0.78);
   backdrop-filter: blur(8px);
 }
 
 .hero-card {
-  background: linear-gradient(165deg, #201241, #120d24);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 40px rgba(8, 6, 17, 0.32);
+  background: linear-gradient(170deg, #17142a, #121020);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 48px rgba(7, 6, 16, 0.4);
 }
 
 .hero-card .badge {
@@ -40,7 +41,7 @@
 }
 
 .hero-visual {
-  background: radial-gradient(circle at 30% 15%, #3b2770, #17102f);
+  background: radial-gradient(circle at 28% 14%, #2b2055, #121020);
   min-height: 360px;
 }
 
@@ -50,7 +51,7 @@
 }
 
 .glass-bar {
-  background: rgba(13, 9, 28, 0.72);
+  background: rgba(12, 10, 22, 0.74);
   border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
@@ -90,7 +91,14 @@
 }
 
 .card {
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
 }
 
 #shop .card-body,
@@ -99,6 +107,56 @@
 #reviews .card-body,
 #newsletter .card-body {
   padding: 1.3rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7b61ff, #5e45df);
+  border-color: #7b61ff;
+  box-shadow: 0 0 0 rgba(123, 97, 255, 0);
+  transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  border-color: #8d78ff;
+  background: linear-gradient(135deg, #846bff, #684de7);
+  box-shadow: 0 0 22px rgba(123, 97, 255, 0.22);
+}
+
+.btn-outline-light,
+.btn-outline-secondary {
+  transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-outline-light:hover,
+.btn-outline-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.form-control,
+.form-select {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f6f1ff;
+}
+
+.form-control::placeholder {
+  color: #b9b0d6;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #7b61ff;
+  box-shadow: 0 0 0 0.16rem rgba(123, 97, 255, 0.18);
+  color: #ffffff;
+}
+
+.badge.text-bg-light {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f1eaff !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .product-card {
@@ -278,6 +336,12 @@
   object-fit: cover;
   border-radius: 0.75rem;
   border: 1px solid var(--bs-border-color);
+}
+
+#tryon-lab .small.text-muted,
+#ai-stylist .small.text-muted,
+#reviews .small.text-muted {
+  color: #b8afcf !important;
 }
 
 .toast-custom {

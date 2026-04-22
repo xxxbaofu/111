@@ -1,183 +1,174 @@
-# WigVerse AI Project Requirements Document (PRD)
+# WigVerse AI — Product-Level PRD (Upgrade)
 
-## 1. Project Overview
+## 1) Product Positioning
 
-WigVerse AI is a conversion-focused wig ecommerce landing and storefront that combines:
+WigVerse AI is not “another wig shop with filters.”  
+It replaces three broken workflows users currently jump between:
 
-- Catalog browsing and filtering
-- AI-assisted profile-based recommendation
-- Try-on planning and image generation
-- Cart and checkout preview
-- Reviews and newsletter conversion
+1. **Marketplace browsing chaos** (endless static product grids),
+2. **Manual social validation** (asking friends/communities if a wig fits),
+3. **Offline imagination gap** (cannot preview look in real context before buying).
 
-The product objective is to reduce decision friction for users selecting wigs (daily and cosplay) by making style fit, scene fit, and visual preview immediately actionable.
+WigVerse AI positions itself as an **AI decision layer + commerce layer**:
+- Understand me
+- Show me what fits
+- Let me preview
+- Let me buy with confidence
 
-Primary audience:
-
-- Wig buyers with uncertainty around fit/style
-- Cosplay creators requiring scene-accurate wig choices
-- Returning users seeking faster checkout decisions
-
-Core conversion flow:
-1. Land on hero and understand value proposition
-2. Generate recommendation from profile
-3. Validate with try-on image output
-4. Add to cart and preview checkout
-5. Subscribe / return
+This is a “guided selection product,” not a catalog-first store.
 
 ---
 
-## 2. Tech Stack
+## 2) UX Strategy
 
-Extracted from existing implementation:
+### 2.1 Why AI Stylist is the Core Entry
 
-### Backend
-- Python 3
-- Flask (`wig_ai_studio/app.py`)
+Traditional e-commerce starts from products.  
+This product starts from **user identity + constraints** (face shape, head size, scene, style intent).
 
-### Frontend
-- Server-rendered HTML (Jinja template in Flask)
-- Vanilla JavaScript (`wig_ai_studio/static/js/app.js`)
-- CSS with Bootstrap theme overrides (`wig_ai_studio/static/css/style.css`)
-- Bootswatch (Lux) + Bootstrap 5.3
-- Three.js (`unpkg` CDN) for 3D wig visualization
+Reason:
+- Wig choice is high-uncertainty and appearance-sensitive.
+- Users do not search by SKU; they search by confidence.
+- AI Stylist converts vague intent into short-list decisions.
 
-### AI / Generation Layer
-- Internal rule-based recommendation engine (`wig_ai_studio/ai_engine.py`)
-- Optional OpenAI image generation integration (`OPENAI_API_KEY`, `gpt-image-1`) with mock fallback
+### 2.2 Why NOT a Traditional E-commerce Layout
 
----
+A purely product-grid-first layout increases cognitive load:
+- too many options too early
+- weak fit confidence
+- low trust in visual outcome
 
-## 3. Dependencies
+Therefore the page must prioritize:
+1. Value proposition (hero)
+2. Guided flow (AI entry)
+3. Validation (try-on output + social proof)
+4. Transaction (cart/checkout preview)
 
-### Python packages (`requirements.txt`)
-- flask
-- openai
-- requests
-- pytrends
-- apscheduler
-- streamlit
-- pandas
-- pytest
-
-### Frontend runtime libraries (CDN)
-- `bootswatch@5.3.3/dist/lux/bootstrap.min.css`
-- `bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js`
-- `three@0.162.0/build/three.min.js`
+Commerce remains present, but not the first cognitive step.
 
 ---
 
-## 4. Design System Reference
+## 3) Page Structure (Critical)
 
-- Source of truth: `style-guide.md`
-- Section-level implementation references:
-  - `website-sections/hero-section.md`
-  - `website-sections/store-section.md`
-  - `website-sections/ai-stylist-section.md`
-  - `website-sections/tryon-lab-section.md`
-  - `website-sections/reviews-newsletter-section.md`
+References:
+- `website-sections/hero-section.md`
+- `website-sections/store-section.md`
+- `website-sections/ai-stylist-section.md`
+- `website-sections/tryon-lab-section.md`
+- `website-sections/reviews-newsletter-section.md`
 
-The style guide governs color, typography, spacing, motion, and component behavior globally.
+### 3.1 Hero Section
+- **Goal**: Conversion + positioning clarity
+- **Layout**: Left (copy + CTA) / Right (3D preview)
+- **Key Interaction**:
+  - Primary CTA to AI Stylist
+  - Secondary CTA to Try-On Lab
+  - 3D color switch affordance
 
----
-
-## 5. Page Sections with File References
-
-Single main page:
-- Template: `wig_ai_studio/templates/index.html`
-
-Sections:
-1. Hero + value proposition + 3D preview  
-   - Spec: `website-sections/hero-section.md`
-2. Storefront filters + product cards  
-   - Spec: `website-sections/store-section.md`
-3. AI Stylist + cart sidebar  
-   - Spec: `website-sections/ai-stylist-section.md`
-4. Try-on Generation Lab  
-   - Spec: `website-sections/tryon-lab-section.md`
-5. Reviews + newsletter capture  
-   - Spec: `website-sections/reviews-newsletter-section.md`
-
-Supporting files:
-- Style: `wig_ai_studio/static/css/style.css`
-- Behavior: `wig_ai_studio/static/js/app.js`
-- API controller: `wig_ai_studio/app.py`
-
----
-
-## 6. File Structure
-
-```text
-/workspace
-├── product-brief.md
-├── style-guide.md
-├── prd.md
-├── tasks.md
-├── website-sections/
-│   ├── hero-section.md
-│   ├── store-section.md
-│   ├── ai-stylist-section.md
-│   ├── tryon-lab-section.md
-│   └── reviews-newsletter-section.md
-├── wig_app.py
-├── wig_ai_studio/
-│   ├── app.py
-│   ├── ai_engine.py
-│   ├── catalog.py
-│   ├── templates/
-│   │   └── index.html
-│   └── static/
-│       ├── css/style.css
-│       ├── js/app.js
-│       ├── uploads/      (runtime, gitignored)
-│       └── generated/    (runtime, gitignored)
-└── tests/
-    ├── test_wig_ai_engine.py
-    └── test_wig_store_api.py
-```
-
----
-
-## 7. Responsiveness Requirements
-
-### Breakpoints
-- Desktop: `>= 1200px`
-- Tablet: `768px - 1199px`
-- Mobile: `< 768px`
-
-### Requirements
-- Hero reorganizes from two-column to stacked on tablet/mobile
-- Product and try-on galleries use responsive grid spans
-- Form controls in AI stylist and try-on lab stack vertically on small screens
-- Cart and checkout remains accessible without horizontal scrolling
-- Minimum tap target size: `44px`
-
----
-
-## 8. Performance Requirements
-
-- First meaningful section render target: <= 2.5s on average 4G conditions (excluding external AI generation time)
-- Keep main stylesheet concise; avoid duplicated utility overrides
-- Lazy-loading recommendation/try-on outputs through user actions only (no eager heavy rendering)
-- Minimize unnecessary re-renders in JS:
-  - only re-render affected sections after API responses
-- Try-on generation:
-  - default max generated images per request: 4
-  - always provide mock fallback to avoid hard failure states
-
-Monitoring requirements:
-- Track conversion micro-events:
-  - hero CTA click
-  - recommendation generation
-  - try-on generation
+### 3.2 Store Section
+- **Goal**: Engagement + shortlist expansion
+- **Layout**: Top control row + product card grid
+- **Key Interaction**:
+  - search/filter/sort
+  - quick view
   - add-to-cart
-  - checkout preview
-  - newsletter submit
+
+### 3.3 AI Stylist Section
+- **Goal**: High-intent conversion
+- **Layout**: Left (profile form) / Right (insights + cart panel)
+- **Key Interaction**:
+  - avatar analysis
+  - recommendation generation
+  - try-on plan generation
+  - checkout preview utility in same decision context
+
+### 3.4 Try-On Lab Section
+- **Goal**: Trust + purchase confidence
+- **Layout**: Control panel + generated gallery
+- **Key Interaction**:
+  - image generation parameters
+  - mock vs real AI mode
+  - generated visual confirmation
+
+### 3.5 Reviews + Newsletter Section
+- **Goal**: Trust + retention
+- **Layout**: Social proof cards followed by compact subscribe form
+- **Key Interaction**:
+  - read proof
+  - subscribe for lifecycle re-entry
 
 ---
 
-## 9. API Surface (Current)
+## 4) Design System Enforcement
 
+Source of truth: `style-guide.md`
+
+### Must stay consistent
+- Color token usage (especially glow limits)
+- Typography hierarchy H1–H5
+- 2–3 card variants only
+- Primary/secondary CTA behavior
+- 8px spacing rhythm
+- Subtle motion limits
+
+### Enforcement mechanism
+- No section-level ad-hoc color definitions
+- No new component variants without style-guide update
+- Every new block must map to existing component primitives
+- UI reviews reject template-like clutter and redundant decorations
+
+---
+
+## 5) Tech Stack (Realistic Target)
+
+### Target Frontend
+- **React + Tailwind CSS** (default target architecture)
+- Componentized section composition
+- Tailwind token mapping from style-guide
+
+### Current Implementation (transitional baseline)
+- Flask + Jinja + vanilla JS + Bootswatch
+
+### Backend / AI
+- Python + Flask API layer
+- Rule-based recommendation engine
+- Optional OpenAI image generation with mock fallback
+
+### Animation approach (no overkill)
+- CSS transitions + lightweight interaction states
+- Optional Framer Motion only for minimal entrance/hover micro-effects
+- No large scene animations in core conversion path
+
+---
+
+## 6) Performance Rules
+
+### Core Rules
+- Do not block first paint with heavy 3D setup
+- 3D canvas initializes lightweight and progressively
+- Try-on generation is always user-triggered (never eager)
+- Limit generated images per request (max 4)
+
+### Loading Strategy
+- Lazy-load non-critical visual modules where possible
+- Defer expensive interactions until user intent is clear
+- Keep hero text + primary CTA instantly available
+
+### Stability Rules
+- All AI image flows must have fallback mode
+- API failures should show graceful UI notices, never dead-end
+
+---
+
+## 7) Architecture & File References
+
+### Current source files
+- Template: `wig_ai_studio/templates/index.html`
+- Styling: `wig_ai_studio/static/css/style.css`
+- Interaction: `wig_ai_studio/static/js/app.js`
+- API: `wig_ai_studio/app.py`
+
+### Key API Surface
 - `GET /api/catalog`
 - `POST /api/ai/avatar-insight`
 - `POST /api/ai/recommend`
@@ -187,5 +178,12 @@ Monitoring requirements:
 - `POST /api/checkout/preview`
 - `POST /api/newsletter/subscribe`
 
-API responses must remain backward compatible with current frontend contracts unless accompanied by frontend updates in the same release.
+---
+
+## 8) Product Quality Guardrails
+
+- If UI feels like template noise, simplify before adding.
+- If hierarchy is unclear, reduce competing accents.
+- If section goal is ambiguous, rewrite copy before redesign.
+- If interaction is not conversion/trust/clarity-critical, remove it.
 

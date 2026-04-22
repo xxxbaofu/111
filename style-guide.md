@@ -1,174 +1,195 @@
-# WigVerse AI Style Guide
+# WigVerse AI — High-End Style Guide (SSOT)
 
-This guide is the single source of truth for visual and interaction decisions across the WigVerse AI storefront project.
-
-## 1) Color Palette
-
-The project uses a dark-premium visual language with high contrast CTAs and subtle neon accents.
-
-### Core Brand Colors
-
-- `#6f42c1` (Primary Purple)
-  - Usage: Primary buttons, key interactive states, accent backgrounds, hero highlights.
-  - Avoid: Large text paragraphs.
-- `#d63384` (Magenta Accent)
-  - Usage: Secondary accent, gradient stops, attention markers.
-  - Avoid: Body text.
-- `#20c997` (Success Mint)
-  - Usage: Success toasts, confirmation indicators, positive states.
-- `#fd7e14` (Warm Highlight)
-  - Usage: Warning emphasis, limited decorative accents.
-
-### Surface and Background Colors
-
-- `#0f0b1d` to `#17102f` family (Dark surfaces)
-  - Usage: Global page background, hero surfaces.
-- `rgba(23, 16, 44, 0.85)` (Glass nav)
-  - Usage: Sticky nav with blur.
-- `rgba(255, 255, 255, 0.04-0.14)` (Layered borders and soft panels)
-  - Usage: Card boundaries, metric boxes, overlays.
-
-### Semantic Colors
-
-- Success: `#20c997` + Bootstrapped success variants.
-- Warning: `#fd7e14` + warning text variants.
-- Error: Bootstrap danger scale (`text-bg-danger`, `#dc3545` family).
-
-### Color Usage Guidance
-
-- Keep long-form text at high readability contrast (light text on dark background).
-- Use saturated colors only for actions and highlights, never as full-page fills.
-- Ensure CTA hierarchy:
-  - Primary CTA = solid purple
-  - Secondary CTA = outline light
-  - Tertiary utility = neutral outline
+This document is the single source of truth for visual language and interaction behavior.
+Direction: **dark / neon / premium** with restrained luxury.  
+Reference quality: **Apple, Stripe, high-end fashion e-commerce**.  
+Anti-goal: anything that feels noisy, gamer-ish, or cheap cyberpunk.
 
 ---
 
-## 2) Typography Scale
+## 1) Color System
 
-Typography is based on Bootswatch Lux defaults with semantic scale control.
+### 1.1 Core Tokens
 
-### Font Stack
+#### Brand / Action
+- `Primary / Aurora Violet`: `#7B61FF`
+- `Secondary / Luxe Indigo`: `#4C3A9E`
+- `Accent / Electric Rose`: `#FF5FA0`
 
-- Primary: system font stack from Bootswatch Lux
-- Fallback strategy: keep defaults for performance and consistency
+#### Utility
+- `Success`: `#2DD4BF`
+- `Warning`: `#F59E0B`
+- `Danger`: `#F43F5E`
+- `Info`: `#60A5FA`
 
-### Type Scale
+### 1.2 Background Layers (critical)
 
-- Hero Title: `display-6` / ~2.5rem desktop, responsive down on mobile
-- Section Titles: `h4` / ~1.5rem
-- Subsection Titles: `h5`/`h6`
-- Body Text: default paragraph size (~1rem)
-- Secondary Body: `small` + muted text
-- Meta Labels: uppercase small tags for step labels
+Use layered surfaces, never a flat single-color canvas.
 
-### Typography Guidance
+- `BG-0 (Global)`: `#0A0911`
+- `BG-1 (Section Surface)`: `#121020`
+- `BG-2 (Raised Card)`: `#17142A`
+- `BG-Glass (Overlay/Nav)`: `rgba(18, 16, 32, 0.72)` + blur
+- `Border Soft`: `rgba(255, 255, 255, 0.10)`
+- `Border Strong`: `rgba(255, 255, 255, 0.18)`
 
-- Maximum hero paragraph width should remain short for quick scan.
-- Never use more than two emphasis levels inside one block.
-- Prefer semantic heading structure (`h1` -> `h2` -> `h3`) for accessibility and SEO.
+### 1.3 Glow Usage Rules (very important)
+
+Glow exists only to support hierarchy, not to decorate.
+
+- **Where allowed**:
+  - Primary CTA focus/hover halo
+  - Hero highlight edge
+  - One accent marker in try-on output area
+- **Glow spec**:
+  - Radius: 12–28px
+  - Opacity: 0.12–0.24 max
+  - Never stack two colored glows on one element
+- **Frequency cap**:
+  - Max 1 glow focal point per viewport section
+
+### 1.4 What NOT to do
+
+- Do not use rainbow/multi-neon gradients.
+- Do not put saturated gradients behind long text blocks.
+- Do not color every card with accent tints.
+- Do not use pure black + pure neon combinations that reduce readability.
+- Do not make secondary actions glow like primary CTAs.
 
 ---
 
-## 3) Component Styles
+## 2) Typography
 
-## Buttons
+Tone: short, editorial, premium, direct.  
+Avoid generic SaaS filler copy.
 
-- Primary: `btn btn-primary`
-- Secondary: `btn btn-outline-light` / `btn btn-outline-secondary`
-- Utility small buttons: `btn-sm`
-- Loading behavior:
-  - Button text swap to action-in-progress copy.
-  - Disabled state must block duplicate requests.
+### 2.1 Hierarchy (H1–H5)
 
-### Cards
+- `H1`: 52 / 58, weight 700, letter-spacing `-0.02em`
+- `H2`: 36 / 42, weight 650, letter-spacing `-0.015em`
+- `H3`: 28 / 34, weight 600, letter-spacing `-0.01em`
+- `H4`: 22 / 30, weight 600, letter-spacing `-0.005em`
+- `H5`: 18 / 26, weight 600, letter-spacing `0`
 
-- Use Bootstrap cards with subtle shadow and border (`shadow-sm`, `border-secondary-subtle`).
-- Card body padding baseline: `1.3rem`.
-- Related content should be grouped by section cards, not flat div blocks.
+### 2.2 Body & Meta
 
-### Badges / Pills
+- `Body-L`: 18 / 30, weight 400
+- `Body-M`: 16 / 28, weight 400
+- `Body-S`: 14 / 22, weight 400
+- `Meta`: 12 / 18, weight 500, letter-spacing `0.04em`
 
-- Value tags: rounded pills for fast visual parsing.
-- Use info/neutral tones for metadata.
-- Use warning accents only for exceptional tags (e.g. cosplay flag).
+### 2.3 Copy Tone Rules
 
-### Forms
+- Prefer statement-led copy: “30秒完成选款判断”
+- Keep hero paragraph <= 2 lines desktop, <= 3 lines mobile.
+- One section = one promise.
+- Avoid adjectives pile-up (“智能/高效/专业/领先” in one sentence).
 
-- Inputs: `form-control`, Selects: `form-select`, toggles with `form-check`.
-- Use concise labels; helper text only when required.
-- Keep filter controls in one row on desktop and stacked on mobile.
+---
 
-### Toasts
+## 3) Component System
 
-- Global toast container for success/warning/error feedback.
-- Auto-dismiss around 2.2s.
-- Do not stack more than one visible toast state at once.
+Keep component library minimal. **2–3 card variants only**.
 
-### Try-On Gallery
+### 3.1 Cards (max 3 variants)
 
-- Use fixed image card heights for visual consistency.
-- Always include scene label + provider metadata below generated image.
+1. **Card / Primary Surface**
+   - For hero and key conversion blocks
+   - BG-2 + soft border + subtle shadow
+2. **Card / Neutral Content**
+   - For store, reviews, newsletter
+   - BG-1 + soft border
+3. **Card / Utility Panel**
+   - For cart, try-on controls, insights
+   - BG-1 + strong border + slight inset highlight
+
+### 3.2 Buttons
+
+- **Primary**:
+  - Solid Aurora Violet
+  - Hover: +4% brightness, subtle glow
+  - Purpose: one per section (max two in hero)
+- **Secondary**:
+  - Transparent / dark with strong border
+  - Hover: border brighten + background tint
+  - Never visually compete with primary
+
+### 3.3 Input Fields (glass/dark UI)
+
+- Dark glass fill: `rgba(255,255,255,0.03–0.06)`
+- Border: soft neutral
+- Focus: 1px primary border + tiny outer halo
+- Placeholder contrast must remain readable (not washed out)
+
+### 3.4 Tags / Chips
+
+- Rounded pill with neutral background
+- One accent chip type for status only (e.g., cosplay)
+- Keep chip copy 1–2 words; avoid sentence chips
 
 ---
 
 ## 4) Spacing System
 
-Use an 8px rhythm mapped via Bootstrap utility classes.
+### 4.1 8px Grid
 
-### Base Rhythm
+Base unit: `8px`
 
-- 4px micro spacing: icon or tiny adjustments only.
-- 8px unit: foundational spacing.
-- 16px unit: most control gaps (`g-2`, `gap-2`).
-- 24px unit: section internal spacing.
-- 32px+ unit: major section separation.
+- `4` (micro adjustment only)
+- `8`, `16`, `24`, `32`, `40`, `48`, `64`, `80`
 
-### Practical Rules
+### 4.2 Section Spacing Rules
 
-- Card-to-card vertical gap: at least `mb-4`.
-- Form element vertical spacing: `mb-2` to `mb-3` depending on density.
-- Hero block spacing should keep CTA visible without scroll on typical desktop.
+- Section-to-section vertical: `64–80px`
+- Card internal padding: `24px` desktop / `16px` mobile
+- Between heading and body: `12–16px`
+- Between body and CTA: `24px`
 
----
+### 4.3 Max Content Width
 
-## 5) Animation Guidelines
-
-Animations should reinforce feedback and state change, not decoration.
-
-### Motion Principles
-
-- Fast feedback: 120ms–220ms for hover/press.
-- Medium transitions: up to 300ms for panel state changes.
-- Avoid long easing chains in core purchase flow.
-
-### Approved Motion
-
-- Hover elevation on cards (subtle shadow/transform).
-- Button state transitions (color and disabled state).
-- Toast entry/exit using Bootstrap default transitions.
-- Optional smooth scroll for anchor navigation.
-
-### Avoid
-
-- Looping non-functional animations near CTA zones.
-- Large parallax or motion-heavy effects that hurt readability.
-- Complex transforms on form controls.
+- Global container: `1200px` max
+- Hero text column: `560px` max readable width
+- Form-heavy sections: never exceed 2-column content density
 
 ---
 
-## 6) Accessibility & Consistency Rules
+## 5) Motion & Interaction
 
-- Maintain contrast ratio for text and interactive controls.
-- Keep focus states visible (do not remove focus outlines globally).
-- Ensure keyboard-accessible interactions for all actionable controls.
-- Use ARIA labels where semantic labels are not self-evident.
+Premium motion is invisible until needed.
+
+### 5.1 Hover Rules
+
+- Card hover: `translateY(-2px)` max
+- Shadow delta: soft only
+- No bouncing or elastic effects
+
+### 5.2 Transition Speed
+
+- Fast: `120ms` (input, toggles)
+- Standard: `180ms` (buttons, cards)
+- Long: `240ms` (overlay/panel)
+- Easing: `cubic-bezier(0.22, 1, 0.36, 1)`
+
+### 5.3 Micro-interactions (subtle only)
+
+- CTA press depth (1–2px)
+- Toast fade/slide micro-entry
+- Loading label swap on async actions
+- Smooth anchor scroll allowed, parallax not allowed
 
 ---
 
-## 7) Design-System Source Reference
+## 6) Minimalism Enforcement
 
-- Theme base: Bootswatch Lux (`bootstrap@5.3.x`)
-- Custom visual layer: `wig_ai_studio/static/css/style.css`
-- Layout source: `wig_ai_studio/templates/index.html`
+- If a section needs explanation, remove visual noise before adding content.
+- Maximum 2–3 primary visual elements per section.
+- Every element must map to: conversion, trust, or clarity.
+- If it looks like a template, simplify and tighten hierarchy.
+
+---
+
+## 7) Implementation Mapping
+
+- Template layer: `wig_ai_studio/templates/index.html`
+- Theme and tokens: `wig_ai_studio/static/css/style.css`
+- Interaction logic: `wig_ai_studio/static/js/app.js`
