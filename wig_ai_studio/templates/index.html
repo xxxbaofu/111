@@ -117,6 +117,7 @@
           </select>
           <button id="resetFilterBtn" class="btn btn-secondary">重置</button>
         </div>
+        <p id="resultMeta" class="inline-tip">正在加载商品...</p>
         <div id="recommendations" class="cards"></div>
       </section>
 
@@ -205,6 +206,10 @@
               优惠码
               <input id="discountCodeInput" type="text" placeholder="如 WIG10" />
             </label>
+            <div class="coupon-row">
+              <button type="button" class="chip coupon-chip" data-coupon="WIG10">使用 WIG10</button>
+              <button type="button" class="chip coupon-chip" data-coupon="COSPLAY88">使用 COSPLAY88</button>
+            </div>
             <label>
               配送方式
               <select id="shippingMethodSelect">
@@ -214,6 +219,7 @@
             </label>
             <button id="checkoutPreviewBtn" type="button" class="btn btn-primary">预估结算</button>
             <div id="checkoutSummary" class="info-box">购物车为空。</div>
+            <div id="checkoutNotice" class="inline-tip"></div>
           </div>
         </aside>
       </section>
@@ -258,6 +264,8 @@
         </div>
       </div>
     </footer>
+
+    <div id="toast" class="toast"></div>
 
     <script src="https://unpkg.com/three@0.162.0/build/three.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

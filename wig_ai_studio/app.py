@@ -240,6 +240,8 @@ def checkout_preview() -> object:
         return jsonify({"error": "items must be a list"}), 400
 
     normalized = []
+    skipped_items = []
+    stock_alerts = []
     subtotal = 0.0
     for row in cart_items:
         if not isinstance(row, dict):
@@ -248,7 +250,20 @@ def checkout_preview() -> object:
         quantity = max(1, _to_int(row.get("quantity"), 1))
         product = CATALOG_MAP.get(product_id)
         if not product:
+            skipped_items.append({"productId": row.get("productId"), "reason": "unknown_product"})
             continue
+        if product.stock <= 0:
+            skipped_items.append({"productId": product.product_id, "reason": "out_of_stock"})
+            continue
+        if quantity > product.stock:
+            stock_alerts.append(
+                {
+                    "productId": product.product_id,
+                    "requestedQuantity": quantity,
+                    "availableStock": product.stock,
+                }
+            )
+            quantity = product.stock
         line_total = product.price_cny * quantity
         subtotal += line_total
         normalized.append(
@@ -282,8 +297,11 @@ def checkout_preview() -> object:
     tax = round((subtotal - discount) * 0.03, 2) if subtotal > 0 else 0.0
     total = round(max(subtotal - discount, 0) + shipping_fee + tax, 2)
 
+    coupon_applied = discount_code if discount > 0 else ""
     payload = {
         "items": normalized,
+        "skippedItems": skipped_items,
+        "stockAlerts": stock_alerts,
         "pricing": {
             "subtotalCny": round(subtotal, 2),
             "discountCny": round(discount, 2),
@@ -291,6 +309,7 @@ def checkout_preview() -> object:
             "taxCny": tax,
             "totalCny": total,
         },
+        "couponApplied": coupon_applied,
         "nextStep": "Proceed to secure checkout",
         "availableCoupons": ["WIG10", "COSPLAY88"],
     }
@@ -303,8 +322,11 @@ def newsletter_subscribe() -> object:
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
     preference = str(data.get("preference", "new-arrivals")).strip().lower()
-    if not email or "@" not in email:
+    if not email or "@" not in email or "." not in email.split("@")[-1]:
         return jsonify({"ok": False, "message": "请输入有效邮箱地址。"}), 400
+    allowed_preferences = {"new-arrivals", "cosplay", "daily-style"}
+    if preference not in allowed_preferences:
+        return jsonify({"ok": False, "message": "订阅偏好不受支持。"}), 400
     existing = next((row for row in NEWSLETTER_SUBSCRIBERS if row["email"] == email), None)
     if existing:
         existing["preference"] = preference

@@ -1,7 +1,9 @@
 const state = {
   avatarBase64: null,
   catalog: [],
+  catalogById: new Map(),
   recommendations: [],
+  recommendationById: new Map(),
   selectedProductIds: [],
   wigColorIndex: 0,
   cart: [],
@@ -29,6 +31,7 @@ const dom = {
   cartItems: document.getElementById("cartItems"),
   checkoutPreviewBtn: document.getElementById("checkoutPreviewBtn"),
   checkoutSummary: document.getElementById("checkoutSummary"),
+  checkoutNotice: document.getElementById("checkoutNotice"),
   discountCodeInput: document.getElementById("discountCodeInput"),
   shippingMethodSelect: document.getElementById("shippingMethodSelect"),
   searchInput: document.getElementById("searchInput"),
@@ -41,7 +44,10 @@ const dom = {
   newsletterEmail: document.getElementById("newsletterEmail"),
   newsletterPreference: document.getElementById("newsletterPreference"),
   newsletterMessage: document.getElementById("newsletterMessage"),
+  toast: document.getElementById("toast"),
 };
+
+const CART_STORAGE_KEY = "wigverse-cart-v1";
 
 function splitInput(value) {
   return String(value || "")
@@ -52,6 +58,49 @@ function splitInput(value) {
 
 function formatCny(value) {
   return `¥${Number(value || 0).toFixed(0)}`;
+}
+
+function showToast(message, isError = false) {
+  if (!dom.toast) return;
+  dom.toast.textContent = message;
+  dom.toast.classList.toggle("error", Boolean(isError));
+  dom.toast.classList.add("show");
+  window.setTimeout(() => dom.toast.classList.remove("show"), 2200);
+}
+
+function setButtonLoading(button, loading, loadingText = "处理中...") {
+  if (!button) return;
+  if (loading) {
+    button.dataset.originalText = button.textContent || "";
+    button.textContent = loadingText;
+    button.disabled = true;
+  } else {
+    button.textContent = button.dataset.originalText || button.textContent || "";
+    button.disabled = false;
+  }
+}
+
+function saveCart() {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cart));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function restoreCart() {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      state.cart = parsed.filter(
+        (row) => row && typeof row.productId === "string" && Number(row.quantity) > 0
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function formToPayload(form) {
@@ -104,7 +153,11 @@ function currentDisplayItems() {
   } else if (sort === "price-desc") {
     items.sort((a, b) => Number(b.priceCny || 0) - Number(a.priceCny || 0));
   } else if (sort === "rating-desc") {
-    items.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    items.sort((a, b) => {
+      const left = Number(state.catalogById.get(String(a.productId || "").toLowerCase())?.rating || a.rating || 0);
+      const right = Number(state.catalogById.get(String(b.productId || "").toLowerCase())?.rating || b.rating || 0);
+      return right - left;
+    });
   } else if (state.recommendations.length) {
     items.sort((a, b) => Number(b.matchScore || 0) - Number(a.matchScore || 0));
   }
@@ -113,8 +166,14 @@ function currentDisplayItems() {
 
 async function loadCatalog() {
   const response = await fetch("/api/catalog");
+  if (!response.ok) {
+    throw new Error("catalog_request_failed");
+  }
   const data = await response.json();
   state.catalog = data.items || [];
+  state.catalogById = new Map(
+    state.catalog.map((item) => [String(item.productId || "").toLowerCase(), item])
+  );
   const summary = data.summary || {};
   dom.metricProducts.textContent = summary.total_products ?? "--";
   dom.metricRating.textContent = summary.avg_rating ?? "--";
@@ -125,6 +184,9 @@ async function loadCatalog() {
 
 async function loadReviews() {
   const response = await fetch("/api/reviews?limit=6");
+  if (!response.ok) {
+    throw new Error("reviews_request_failed");
+  }
   const data = await response.json();
   state.reviewItems = data.items || [];
   renderReviews();
@@ -244,15 +306,23 @@ function updateCartBadge() {
 }
 
 function findCatalogById(productId) {
-  const id = String(productId || "").toLowerCase();
-  return state.catalog.find((item) => String(item.productId || "").toLowerCase() === id);
+  return state.catalogById.get(String(productId || "").toLowerCase());
 }
 
 function addToCart(productId) {
   const product = findCatalogById(productId);
   if (!product) return;
-    const existing = state.cart.find((row) => row.productId === product.productId);
+  const maxStock = Number(product.stock || 0);
+  if (maxStock <= 0) {
+    showToast("该商品当前缺货", true);
+    return;
+  }
+  const existing = state.cart.find((row) => row.productId === product.productId);
   if (existing) {
+    if (existing.quantity >= maxStock) {
+      showToast("已达到该商品可购买上限", true);
+      return;
+    }
     existing.quantity += 1;
   } else {
     state.cart.push({
@@ -263,6 +333,7 @@ function addToCart(productId) {
     });
   }
   renderCartItems();
+  showToast("已加入购物车");
 }
 
 function changeCartQuantity(productId, delta) {
@@ -277,8 +348,10 @@ function changeCartQuantity(productId, delta) {
 
 function renderCartItems() {
   updateCartBadge();
+  saveCart();
   if (!state.cart.length) {
     dom.cartItems.innerHTML = `<p class="empty-tip">还没有商品，先去商城加购吧。</p>`;
+    dom.checkoutNotice.textContent = "";
     return;
   }
   dom.cartItems.innerHTML = state.cart
@@ -310,20 +383,52 @@ async function previewCheckout() {
     discountCode: String(dom.discountCodeInput.value || "").trim(),
     shippingMethod: String(dom.shippingMethodSelect.value || "standard"),
   };
-  const response = await fetch("/api/checkout/preview", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  const pricing = data.pricing || {};
-  dom.checkoutSummary.innerHTML = `
-    <strong>小计：</strong>${formatCny(pricing.subtotalCny)}<br/>
-    <strong>优惠：</strong>- ${formatCny(pricing.discountCny)}<br/>
-    <strong>运费：</strong>${formatCny(pricing.shippingCny)}<br/>
-    <strong>税费：</strong>${formatCny(pricing.taxCny)}<br/>
-    <strong>应付：</strong>${formatCny(pricing.totalCny)}
-  `;
+  setButtonLoading(dom.checkoutPreviewBtn, true, "计算中...");
+  try {
+    const response = await fetch("/api/checkout/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error("checkout_preview_failed");
+    }
+    const data = await response.json();
+    const pricing = data.pricing || {};
+    dom.checkoutSummary.innerHTML = `
+      <strong>小计：</strong>${formatCny(pricing.subtotalCny)}<br/>
+      <strong>优惠：</strong>- ${formatCny(pricing.discountCny)}<br/>
+      <strong>运费：</strong>${formatCny(pricing.shippingCny)}<br/>
+      <strong>税费：</strong>${formatCny(pricing.taxCny)}<br/>
+      <strong>应付：</strong>${formatCny(pricing.totalCny)}
+    `;
+    const notices = [];
+    if (data.couponApplied) {
+      notices.push(`已应用优惠码：${data.couponApplied}`);
+    }
+    if (Array.isArray(data.stockAlerts) && data.stockAlerts.length) {
+      notices.push("部分商品数量超出库存，已自动调整。");
+      data.stockAlerts.forEach((alert) => {
+        const row = state.cart.find((item) => item.productId === alert.productId);
+        if (row) row.quantity = alert.availableStock;
+      });
+      renderCartItems();
+    }
+    if (Array.isArray(data.skippedItems) && data.skippedItems.length) {
+      notices.push("部分商品已失效或缺货，未计入结算。");
+      const skippedSet = new Set(data.skippedItems.map((item) => String(item.productId || "")));
+      state.cart = state.cart.filter((row) => !skippedSet.has(row.productId));
+      renderCartItems();
+    }
+    dom.checkoutNotice.textContent = notices.join(" ");
+    showToast("结算预估已更新");
+  } catch (error) {
+    dom.checkoutNotice.textContent = "结算预估失败，请稍后重试。";
+    showToast("结算预估失败", true);
+    console.error(error);
+  } finally {
+    setButtonLoading(dom.checkoutPreviewBtn, false);
+  }
 }
 
 async function analyzeAvatar() {
@@ -333,28 +438,54 @@ async function analyzeAvatar() {
   payload.styleKeywords = payload.preferredStyles;
   payload.sceneKeywords = payload.targetScenes;
   payload.avatarImageBase64 = state.avatarBase64;
-  const response = await fetch("/api/ai/avatar-insight", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  renderInsight(data.insight, data.avatarImagePath);
+  setButtonLoading(dom.avatarAnalyzeBtn, true, "分析中...");
+  try {
+    const response = await fetch("/api/ai/avatar-insight", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error("avatar_insight_failed");
+    }
+    const data = await response.json();
+    renderInsight(data.insight, data.avatarImagePath);
+    showToast("AI头像分析已完成");
+  } finally {
+    setButtonLoading(dom.avatarAnalyzeBtn, false);
+  }
 }
 
 async function generateRecommendations(evt) {
   evt.preventDefault();
   const payload = formToPayload(dom.profileForm);
-  const response = await fetch("/api/ai/recommend", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  state.recommendations = data.recommendations || [];
+  const submitBtn = dom.profileForm.querySelector('button[type="submit"]');
+  setButtonLoading(submitBtn, true, "生成中...");
+  try {
+    const response = await fetch("/api/ai/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error("recommendation_failed");
+    }
+    const data = await response.json();
+    state.recommendations = data.recommendations || [];
+    state.recommendationById = new Map(
+      state.recommendations.map((item) => [String(item.productId || "").toLowerCase(), item])
+    );
     state.selectedProductIds = state.recommendations.slice(0, 3).map((item) => item.productId);
-  renderCatalogCards(currentDisplayItems(), false);
-  await generateTryonPlans();
+    renderCatalogCards(currentDisplayItems(), false);
+    await generateTryonPlans();
+    showToast("推荐结果已更新");
+  } catch (error) {
+    dom.insightBox.textContent = "推荐生成失败，请稍后重试。";
+    showToast("推荐生成失败", true);
+    console.error(error);
+  } finally {
+    setButtonLoading(submitBtn, false);
+  }
 }
 
 async function generateTryonPlans() {
@@ -365,6 +496,9 @@ async function generateTryonPlans() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  if (!response.ok) {
+    throw new Error("tryon_plan_failed");
+  }
   const data = await response.json();
   renderTryonPlans(data.plans || []);
 }
@@ -375,13 +509,28 @@ async function submitNewsletter(evt) {
     email: String(dom.newsletterEmail.value || "").trim(),
     preference: String(dom.newsletterPreference.value || "new-arrivals"),
   };
-  const response = await fetch("/api/newsletter/subscribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  dom.newsletterMessage.textContent = data.message || "提交成功。";
+  const submitBtn = dom.newsletterForm.querySelector('button[type="submit"]');
+  setButtonLoading(submitBtn, true, "提交中...");
+  try {
+    const response = await fetch("/api/newsletter/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "newsletter_failed");
+    }
+    dom.newsletterMessage.textContent = data.message || "提交成功。";
+    dom.newsletterEmail.value = "";
+    showToast("订阅成功");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "订阅失败，请稍后再试。";
+    dom.newsletterMessage.textContent = message;
+    showToast("订阅失败", true);
+  } finally {
+    setButtonLoading(submitBtn, false);
+  }
 }
 
 function handleCardAction(event) {
@@ -456,6 +605,13 @@ function bindEvents() {
 
   dom.checkoutPreviewBtn.addEventListener("click", async () => {
     await previewCheckout();
+  });
+
+  document.querySelectorAll(".coupon-chip").forEach((button) => {
+    button.addEventListener("click", () => {
+      dom.discountCodeInput.value = button.dataset.coupon || "";
+      showToast("优惠码已填入");
+    });
   });
 
   dom.recommendations.addEventListener("click", handleCardAction);
@@ -557,8 +713,17 @@ function init3dScene() {
 async function boot() {
   bindEvents();
   init3dScene();
+  restoreCart();
   renderCartItems();
-  await Promise.all([loadCatalog(), loadReviews()]);
+  const [catalogRes, reviewsRes] = await Promise.allSettled([loadCatalog(), loadReviews()]);
+  if (catalogRes.status === "rejected") {
+    showToast("商品数据加载失败，请刷新页面。", true);
+  }
+  if (reviewsRes.status === "rejected") {
+    showToast("评价数据暂不可用。", true);
+  }
+  state.cart = state.cart.filter((row) => findCatalogById(row.productId));
+  renderCartItems();
 }
 
 boot().catch((error) => {
