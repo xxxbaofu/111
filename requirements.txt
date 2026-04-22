@@ -5,3 +5,4 @@ apscheduler
 pytest
 streamlit
 pandas
+flask

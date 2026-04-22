@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WigVerse AI - 3D智能假发试戴平台</title>
+    <meta
+      name="description"
+      content="WigVerse AI 提供 3D 假发展示、AI 头像分析、头围匹配、cosplay 场景化试戴和智能推荐。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-row">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <span class="brand-text">WigVerse AI</span>
+        </div>
+        <nav class="main-nav">
+          <a href="#demo">3D试戴</a>
+          <a href="#ai-stylist">AI发型师</a>
+          <a href="#catalog">假发库</a>
+          <a href="#workflow">服务流程</a>
+        </nav>
+        <button id="bookBtn" class="btn btn-primary">预约 AI 顾问</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container">
+        <div class="hero-copy">
+          <p class="badge">AI + 3D + 场景化试戴</p>
+          <h1>找到真正适合你的假发，从头像分析到佩戴决策一步完成</h1>
+          <p class="subtitle">
+            覆盖日常通勤、婚礼造型、舞台妆造、cosplay 角色还原。上传头像后，AI会自动匹配脸型、头围和使用场景，给出可解释推荐。
+          </p>
+          <div class="hero-actions">
+            <a href="#ai-stylist" class="btn btn-primary">开始智能试戴</a>
+            <a href="#catalog" class="btn btn-secondary">浏览全部假发</a>
+          </div>
+          <div class="hero-metrics">
+            <div class="metric">
+              <span class="metric-value" id="metricProducts">--</span>
+              <span class="metric-label">在售款式</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metricRating">--</span>
+              <span class="metric-label">平均评分</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="metricCosplay">--</span>
+              <span class="metric-label">Cosplay占比</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual" id="demo">
+          <canvas id="wig3dCanvas" aria-label="3D假发演示"></canvas>
+          <div class="canvas-hud">
+            <span>3D Demo</span>
+            <button id="switchWigColorBtn" class="chip">切换发色</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="container panel" id="ai-stylist">
+        <div class="section-head">
+          <h2>AI 发型师</h2>
+          <p>上传头像并填写参数，获取可解释推荐与场景试戴计划。</p>
+        </div>
+        <div class="grid two-cols">
+          <form id="profileForm" class="form-card">
+            <h3>你的资料</h3>
+            <label>
+              头像（用于分析，不公开）
+              <input type="file" id="avatarInput" accept="image/*" />
+            </label>
+            <div class="row">
+              <label>
+                头围 (cm)
+                <input type="number" name="headCircumferenceCm" min="50" max="64" value="56" />
+              </label>
+              <label>
+                脸型
+                <select name="faceShape">
+                  <option value="oval">椭圆</option>
+                  <option value="round">圆脸</option>
+                  <option value="square">方脸</option>
+                  <option value="heart">心形</option>
+                  <option value="diamond">菱形</option>
+                </select>
+              </label>
+            </div>
+            <div class="row">
+              <label>
+                预算下限 (¥)
+                <input type="number" name="budgetMin" min="100" max="3000" value="300" />
+              </label>
+              <label>
+                预算上限 (¥)
+                <input type="number" name="budgetMax" min="200" max="5000" value="1200" />
+              </label>
+            </div>
+            <label>
+              目标场景（英文逗号分隔，如 office,cosplay,date）
+              <input type="text" name="targetScenes" value="daily,photo-shoot" />
+            </label>
+            <label>
+              偏好发型（如 bob,long-wave,twin-tail）
+              <input type="text" name="preferredStyles" value="bob,long-wave" />
+            </label>
+            <label>
+              偏好色系（如 brown,pink,blue,black）
+              <input type="text" name="preferredColors" value="brown,black" />
+            </label>
+            <div class="row">
+              <label>
+                舒适度优先级 (1-10)
+                <input type="range" name="comfortPriority" min="1" max="10" value="8" />
+              </label>
+              <label>
+                打理容忍度 (1-10)
+                <input type="range" name="maintenanceTolerance" min="1" max="10" value="5" />
+              </label>
+            </div>
+            <label class="inline">
+              <input type="checkbox" name="wantsCosplay" />
+              我主要需要 cosplay / 漫展风格
+            </label>
+            <div class="form-actions">
+              <button type="button" id="avatarAnalyzeBtn" class="btn btn-secondary">AI分析头像</button>
+              <button type="submit" class="btn btn-primary">生成推荐</button>
+            </div>
+          </form>
+
+          <div class="insight-card">
+            <h3>AI 头像洞察</h3>
+            <img id="avatarPreview" alt="头像预览" class="avatar-preview hidden" />
+            <div id="insightBox" class="info-box">等待你上传头像并点击“AI分析头像”。</div>
+            <h4>多场景试戴计划</h4>
+            <div id="tryonPlans" class="plans"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="container panel" id="catalog">
+        <div class="section-head">
+          <h2>推荐与假发库</h2>
+          <p>结合 AI 推荐分、头围适配、场景匹配度和风格一致性。</p>
+        </div>
+        <div id="recommendations" class="cards"></div>
+      </section>
+
+      <section class="container panel">
+        <div class="section-head">
+          <h2>AI 应用设计（产品经理视角）</h2>
+          <p>明确哪些环节需要 AI，哪些由规则和业务系统承接，保证体验稳定与可解释。</p>
+        </div>
+        <div class="steps">
+          <article>
+            <h3>导购前：头像语义分析</h3>
+            <p>AI 从用户头像中提取脸型、肤色倾向和风格关键词，生成首轮发色与造型建议。</p>
+          </article>
+          <article>
+            <h3>选购中：个性化推荐引擎</h3>
+            <p>AI 综合头围、预算、场景、cosplay 偏好，输出可解释推荐分与原因。</p>
+          </article>
+          <article>
+            <h3>决策中：场景化试戴生成</h3>
+            <p>AI 为日常/约会/舞台/漫展自动生成试戴提示词，并可接图像生成模型渲染效果图。</p>
+          </article>
+          <article>
+            <h3>售后与运营：持续学习</h3>
+            <p>将退换货、好评图、收藏和复购数据回流，训练下一版推荐策略与库存预测。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="container panel workflow" id="workflow">
+        <div class="section-head">
+          <h2>AI 驱动服务流程</h2>
+        </div>
+        <div class="steps">
+          <article>
+            <h3>1. 头像理解</h3>
+            <p>AI 识别脸型、肤色倾向、风格标签，输出基础建议。</p>
+          </article>
+          <article>
+            <h3>2. 头围与舒适度匹配</h3>
+            <p>根据帽围范围、发量重量和佩戴时长给出适配评分。</p>
+          </article>
+          <article>
+            <h3>3. 多场景试戴生成</h3>
+            <p>自动生成日常、约会、舞台、cosplay 的试戴提示词。</p>
+          </article>
+          <article>
+            <h3>4. 下单与复购</h3>
+            <p>保存你的数字档案，后续可一键复用偏好快速选款。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <div>
+          <strong>WigVerse AI</strong>
+          <p>让每一次假发选择都精准、可解释、可视化。</p>
+        </div>
+        <div class="footer-links">
+          <a href="#ai-stylist">智能选款</a>
+          <a href="#catalog">热卖款式</a>
+          <a href="#workflow">品牌服务</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/three@0.162.0/build/three.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

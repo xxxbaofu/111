@@ -5,3 +5,4 @@ __pycache__/
 .pytest_cache/
 selection_radar.db
 output/
+wig_ai_studio/static/uploads/

@@ -86,3 +86,44 @@ streamlit run selection_radar/dashboard.py --server.port 8501 --server.headless 
 - 分类分布图
 - Top机会明细表
 - 单产品理由查看
+
+---
+
+## 新增：WigVerse AI（3D 假发演示与 AI 试戴网站）
+
+本仓库新增了一个可运行的假发智能选购站点原型，包含：
+
+- 3D 假发头模演示（Three.js）
+- AI 头像洞察（脸型/肤色提示）
+- 头围匹配与预算匹配推荐
+- cosplay / 日常 / 舞台等场景化试戴计划生成
+- 假发商品库与可解释推荐原因
+
+### 启动方式
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python wig_app.py
+```
+
+然后打开：
+
+```text
+http://127.0.0.1:8080
+```
+
+### 主要接口
+
+- `GET /api/catalog`：假发库与统计
+- `POST /api/ai/avatar-insight`：头像洞察（支持 base64 头像）
+- `POST /api/ai/recommend`：AI 推荐列表
+- `POST /api/ai/tryon-plan`：多场景试戴提示词计划
+
+### AI 结合设计（核心场景）
+
+1. **导购前**：AI 头像语义分析（脸型、肤色、风格关键词）
+2. **选购中**：AI 推荐引擎（头围、预算、场景、风格、cosplay偏好）
+3. **决策中**：多场景试戴生成（可对接图像模型渲染）
+4. **运营后**：行为回流做推荐策略优化与库存预测
