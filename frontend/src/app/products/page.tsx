@@ -153,6 +153,18 @@ export default function ProductsPage() {
               >
                 打开收藏与备注
               </Link>
+              <Link
+                className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                href={`/opportunities?region=${region}`}
+              >
+                打开机会中枢
+              </Link>
+              <Link
+                className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                href={`/compare?region=${region}`}
+              >
+                打开产品对比台
+              </Link>
               {list.slice(0, 3).map((item) => (
                 <Link
                   key={item.id}

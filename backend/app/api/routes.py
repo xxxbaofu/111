@@ -18,7 +18,9 @@ from app.services.queries import (
     get_growth_payload,
     get_leaders_payload,
     get_market_payload,
+    get_opportunity_brief_payload,
     get_product_payload,
+    get_products_compare_payload,
     get_regions_overview_payload,
     get_system_status_payload,
     get_workbench_payload,
@@ -240,6 +242,37 @@ def delete_bookmark(bookmark_id: int, db: Session = Depends(get_db)) -> dict[str
 @router.get("/daily-report")
 def daily_report(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     return get_daily_report_payload(db, region=region)
+
+
+@router.get("/opportunity-brief")
+def opportunity_brief(
+    region: str,
+    budget_limit: float | None = None,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return get_opportunity_brief_payload(db, region=region, budget_limit=budget_limit)
+
+
+@router.get("/products/compare")
+def products_compare(
+    region: str,
+    ids: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    parsed_ids: list[int] = []
+    for part in ids.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            pid = int(part)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"Invalid product id: {part}") from exc
+        if pid > 0:
+            parsed_ids.append(pid)
+    if len(parsed_ids) < 2:
+        raise HTTPException(status_code=400, detail="At least 2 product ids are required")
+    return get_products_compare_payload(db, region=region, product_ids=parsed_ids[:5])
 
 
 @router.get("/budget/simulate")

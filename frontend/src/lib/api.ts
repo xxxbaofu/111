@@ -306,6 +306,79 @@ export type MultiPlatformBudgetSimulatorResponse = {
   };
 };
 
+export type OpportunityBriefResponse = {
+  region: Region;
+  top_n: number;
+  opportunities: Array<{
+    id: number;
+    name_cn: string;
+    name_en: string;
+    score: number;
+    growth_score: number;
+    competition_score: number;
+    budget_daily: number;
+    recommendation: string;
+  }>;
+  quick_wins: Array<{
+    id: number;
+    name_cn: string;
+    score: number;
+    why: string;
+  }>;
+  risk_alerts: Array<{
+    id: number;
+    name_cn: string;
+    score: number;
+    risk: string;
+  }>;
+  category_momentum: Array<{
+    category: string;
+    avg_score: number;
+    avg_growth: number;
+    product_count: number;
+  }>;
+  budget_guardrail: {
+    total_daily_budget: number;
+    top1_budget_ratio: number;
+    top3_budget_ratio: number;
+    health: string;
+    suggestion: string;
+  };
+};
+
+export type ProductsCompareResponse = {
+  region: Region;
+  count: number;
+  items: Array<{
+    id: number;
+    name_cn: string;
+    name_en: string;
+    score: number;
+    growth_score: number;
+    heat_score: number;
+    discussion_score: number;
+    competition_score: number;
+    budget_daily: number;
+    estimated_daily_revenue: number;
+    efficiency: number;
+    recommendation: string;
+    risk_level: string;
+    newbie_fit: boolean;
+    strategy_type: string;
+  }>;
+  winner: {
+    id: number;
+    name_cn: string;
+    score: number;
+    why: string;
+  };
+  summary: {
+    total_budget_daily: number;
+    total_estimated_daily_revenue: number;
+    avg_efficiency: number;
+  };
+};
+
 export async function getMarket(region: Region): Promise<MarketResponse> {
   return req(`/market?${toQuery({ region })}`);
 }
@@ -404,6 +477,20 @@ export async function deleteBookmark(
 
 export async function getDailyReport(region: Region): Promise<DailyReportResponse> {
   return req(`/daily-report?${toQuery({ region })}`);
+}
+
+export async function getOpportunityBrief(params: {
+  region: Region;
+  budget_limit?: number;
+}): Promise<OpportunityBriefResponse> {
+  return req(`/opportunity-brief?${toQuery(params)}`);
+}
+
+export async function getProductsCompare(params: {
+  region: Region;
+  ids: string;
+}): Promise<ProductsCompareResponse> {
+  return req(`/products/compare?${toQuery(params)}`);
 }
 
 export async function simulateBudget(params: {

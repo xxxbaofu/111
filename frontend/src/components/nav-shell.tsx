@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Bookmark,
+  CircleGauge,
   Compass,
+  Crosshair,
   FileText,
   Layers,
   Megaphone,
@@ -30,6 +32,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/workflow", label: "执行看板", icon: <SquareKanban className="h-4 w-4" /> },
   { href: "/bookmarks", label: "收藏与备注", icon: <Bookmark className="h-4 w-4" /> },
   { href: "/daily-report", label: "自动日报", icon: <FileText className="h-4 w-4" /> },
+  { href: "/opportunity", label: "机会中枢", icon: <CircleGauge className="h-4 w-4" /> },
+  { href: "/compare", label: "产品对比台", icon: <Crosshair className="h-4 w-4" /> },
   { href: "/ads", label: "广告洞察", icon: <Megaphone className="h-4 w-4" /> },
   { href: "/leaders", label: "头部榜单", icon: <Rocket className="h-4 w-4" /> },
   { href: "/growth", label: "增长中心", icon: <TrendingUp className="h-4 w-4" /> },

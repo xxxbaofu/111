@@ -808,3 +808,211 @@ def get_multi_platform_budget_simulator_payload(
             "blended_cpa": round(blended_cpa, 2),
         },
     }
+
+
+def get_opportunity_brief_payload(
+    db: Session,
+    *,
+    region: str,
+    budget_limit: float | None = None,
+    top_n: int = 8,
+) -> dict[str, Any]:
+    safe_top_n = max(3, min(int(top_n), 20))
+    products = db.scalars(
+        select(Product)
+        .where(Product.market == region)
+        .order_by(desc(Product.total_score), desc(Product.growth_score))
+        .limit(safe_top_n * 3)
+    ).all()
+    top_products = products[:safe_top_n]
+    if budget_limit is not None and float(budget_limit) > 0:
+        top_products = [p for p in top_products if float(p.budget_daily) <= float(budget_limit)]
+
+    quick_wins = [
+        p
+        for p in top_products
+        if p.recommendation in {"强烈推荐", "可以测试"} and float(p.competition_score) <= 58
+    ][:5]
+    risk_alerts = [
+        p
+        for p in top_products
+        if float(p.competition_score) >= 70 or float(p.growth_score) <= 0.08
+    ][:5]
+
+    category_rows = db.execute(
+        select(
+            Category.name.label("name"),
+            func.avg(Product.total_score).label("avg_score"),
+            func.avg(Product.growth_score).label("avg_growth"),
+            func.count(Product.id).label("product_count"),
+        )
+        .join(Product, Product.category_id == Category.id)
+        .where(Category.market == region)
+        .group_by(Category.name)
+        .order_by(desc("avg_growth"), desc("avg_score"))
+        .limit(6)
+    ).all()
+
+    total_daily_budget = sum(float(p.budget_daily or 0) for p in top_products)
+    top1_budget = float(top_products[0].budget_daily) if top_products else 0.0
+    top3_budget = sum(float(p.budget_daily or 0) for p in top_products[:3])
+    top1_ratio = top1_budget / max(total_daily_budget, 0.01)
+    top3_ratio = top3_budget / max(total_daily_budget, 0.01)
+    budget_health = (
+        "健康"
+        if top1_ratio <= 0.45 and top3_ratio <= 0.78
+        else "偏集中"
+        if top1_ratio <= 0.55
+        else "过于集中"
+    )
+
+    return {
+        "region": region,
+        "top_n": safe_top_n,
+        "count": len(top_products),
+        "applied_budget_limit": round(float(budget_limit), 2)
+        if budget_limit is not None and float(budget_limit) > 0
+        else None,
+        "opportunities": [
+            {
+                "id": int(p.id),
+                "name_cn": p.name_cn,
+                "name_en": p.name_en,
+                "score": round(float(p.total_score), 2),
+                "growth_score": round(float(p.growth_score), 3),
+                "competition_score": round(float(p.competition_score), 2),
+                "budget_daily": round(float(p.budget_daily), 2),
+                "recommendation": p.recommendation,
+            }
+            for p in top_products
+        ],
+        "quick_wins": [
+            {
+                "id": int(p.id),
+                "name_cn": p.name_cn,
+                "score": round(float(p.total_score), 2),
+                "why": f"竞争 {float(p.competition_score):.1f} 较低，增长 {float(p.growth_score):.3f} 可快速验证。",
+            }
+            for p in quick_wins
+        ],
+        "risk_alerts": [
+            {
+                "id": int(p.id),
+                "name_cn": p.name_cn,
+                "score": round(float(p.total_score), 2),
+                "risk": (
+                    f"竞争 {float(p.competition_score):.1f} 偏高，建议先控预算。"
+                    if float(p.competition_score) >= 70
+                    else f"增长 {float(p.growth_score):.3f} 偏弱，建议缩小测试窗口。"
+                ),
+            }
+            for p in risk_alerts
+        ],
+        "category_momentum": [
+            {
+                "category": str(row.name),
+                "avg_score": round(float(row.avg_score or 0), 2),
+                "avg_growth": round(float(row.avg_growth or 0), 3),
+                "product_count": int(row.product_count or 0),
+            }
+            for row in category_rows
+        ],
+        "budget_guardrail": {
+            "total_daily_budget": round(total_daily_budget, 2),
+            "top1_budget_ratio": round(top1_ratio, 3),
+            "top3_budget_ratio": round(top3_ratio, 3),
+            "health": budget_health,
+            "suggestion": (
+                "预算分布均衡，可按日复盘后逐步提量。"
+                if budget_health == "健康"
+                else "预算过于集中，建议将 15%-25% 转移到第二梯队产品做分散测试。"
+            ),
+        },
+    }
+
+
+def get_products_compare_payload(
+    db: Session,
+    *,
+    region: str,
+    product_ids: list[int],
+) -> dict[str, Any]:
+    cleaned_ids: list[int] = []
+    for pid in product_ids:
+        if int(pid) > 0 and int(pid) not in cleaned_ids:
+            cleaned_ids.append(int(pid))
+    cleaned_ids = cleaned_ids[:6]
+    if len(cleaned_ids) < 2:
+        raise ValueError("At least 2 product_ids are required")
+
+    products = db.scalars(
+        select(Product)
+        .where(Product.market == region, Product.id.in_(cleaned_ids))
+        .order_by(desc(Product.total_score), desc(Product.growth_score))
+    ).all()
+    if len(products) < 2:
+        raise ValueError("Not enough products found for compare")
+
+    items: list[dict[str, Any]] = []
+    for product in products:
+        efficiency = float(product.estimated_daily_revenue) / max(float(product.budget_daily), 1.0)
+        risk_level = (
+            "高"
+            if float(product.competition_score) >= 70 or float(product.growth_score) <= 0.08
+            else "中"
+            if float(product.competition_score) >= 55
+            else "低"
+        )
+        newbie_fit = bool(float(product.budget_daily) <= 50 and float(product.competition_score) <= 58)
+        items.append(
+            {
+                "id": int(product.id),
+                "name_cn": product.name_cn,
+                "name_en": product.name_en,
+                "score": round(float(product.total_score), 2),
+                "growth_score": round(float(product.growth_score), 3),
+                "heat_score": round(float(product.heat_score), 2),
+                "discussion_score": round(float(product.discussion_score), 2),
+                "competition_score": round(float(product.competition_score), 2),
+                "budget_daily": round(float(product.budget_daily), 2),
+                "estimated_daily_revenue": round(float(product.estimated_daily_revenue), 2),
+                "efficiency": round(efficiency, 2),
+                "recommendation": product.recommendation,
+                "risk_level": risk_level,
+                "newbie_fit": newbie_fit,
+                "strategy_type": product.strategy_type,
+            }
+        )
+
+    winner = max(
+        items,
+        key=lambda item: (
+            float(item["score"]),
+            float(item["growth_score"]),
+            -float(item["competition_score"]),
+            float(item["efficiency"]),
+        ),
+    )
+    total_budget = sum(float(item["budget_daily"]) for item in items)
+    total_revenue = sum(float(item["estimated_daily_revenue"]) for item in items)
+    avg_efficiency = total_revenue / max(total_budget, 1.0)
+
+    return {
+        "region": region,
+        "count": len(items),
+        "items": items,
+        "winner": {
+            "id": int(winner["id"]),
+            "name_cn": str(winner["name_cn"]),
+            "score": float(winner["score"]),
+            "why": (
+                f"综合分 {float(winner['score']):.1f}，增长 {float(winner['growth_score']):.3f}，"
+                f"效率 {float(winner['efficiency']):.2f}，综合胜出。"
+            ),
+        },
+        "summary": {
+            "total_budget_daily": round(total_budget, 2),
+            "total_estimated_daily_revenue": round(total_revenue, 2),
+            "avg_efficiency": round(avg_efficiency, 2),
+        },
+    }
