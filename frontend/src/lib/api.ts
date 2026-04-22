@@ -182,6 +182,47 @@ export type ProductDetailResponse = ProductRow & {
     mention_count: number;
   }>;
   ads: AdsResponse["items"];
+  decision?: {
+    conclusion: string;
+    why: string;
+    how: string;
+    budget: {
+      daily: number;
+      test: number;
+      scale: number;
+    };
+    risk: string;
+  };
+};
+
+export type WorkbenchResponse = {
+  region: Region;
+  market: MarketResponse;
+  top_categories: CategoryResponse["items"];
+  top_products: ProductRow[];
+  decisions: DecisionRow[];
+};
+
+export type WorkflowTaskRow = {
+  id: number;
+  product_id: number;
+  product_name: string;
+  market: string;
+  status: "待测试" | "测试中" | "复盘中" | "停投";
+  priority: number;
+  owner: string;
+  note: string;
+  next_action: string;
+  score: number;
+  budget_daily: number;
+  recommendation: string;
+  updated_at: string | null;
+};
+
+export type WorkflowTasksResponse = {
+  region: Region;
+  count: number;
+  items: WorkflowTaskRow[];
 };
 
 export async function getMarket(region: Region): Promise<MarketResponse> {
@@ -226,6 +267,30 @@ export async function getDecisions(params: {
 
 export async function getSystemStatus(): Promise<SystemStatusResponse> {
   return req("/system/status");
+}
+
+export async function getWorkbench(region: Region): Promise<WorkbenchResponse> {
+  return req(`/workbench?${toQuery({ region })}`);
+}
+
+export async function getWorkflowTasks(region: Region): Promise<WorkflowTasksResponse> {
+  return req(`/workflow/tasks?${toQuery({ region })}`);
+}
+
+export async function upsertWorkflowTask(payload: {
+  product_id: number;
+  region: Region;
+  status: "待测试" | "测试中" | "复盘中" | "停投";
+  priority?: number;
+  owner?: string;
+  note?: string;
+  next_action?: string;
+}): Promise<{ status: string; item: WorkflowTaskRow }> {
+  return req("/workflow/task", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function deleteWorkflowTask(taskId: number): Promise<{ deleted: boolean; task_id: number }> {
+  return req(`/workflow/task/${taskId}`, { method: "DELETE" });
 }
 
 export async function getProduct(id: number): Promise<ProductDetailResponse> {

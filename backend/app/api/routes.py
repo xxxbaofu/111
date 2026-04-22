@@ -19,7 +19,11 @@ from app.services.queries import (
     get_product_payload,
     get_regions_overview_payload,
     get_system_status_payload,
+    get_workbench_payload,
     list_products_payload,
+    list_workflow_tasks_payload,
+    upsert_workflow_task_payload,
+    delete_workflow_task_payload,
 )
 from app.tasks.seed import seed_sample_data
 
@@ -109,6 +113,73 @@ def decisions(
 @router.get("/system/status")
 def system_status(db: Session = Depends(get_db)) -> dict[str, Any]:
     return get_system_status_payload(db)
+
+
+@router.get("/workbench")
+def workbench(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    return get_workbench_payload(db, region=region)
+
+
+@router.get("/workflow/tasks")
+def workflow_tasks(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_workflow_tasks_payload(db, region=region)
+
+
+@router.post("/workflow/task")
+def upsert_workflow_task(payload: dict[str, Any], db: Session = Depends(get_db)) -> dict[str, Any]:
+    product_id = int(payload.get("product_id", 0))
+    region = str(payload.get("region", "")).strip()
+    if product_id <= 0 or not region:
+        raise HTTPException(status_code=400, detail="product_id and region are required")
+    status = str(payload.get("status", "待测试"))
+    priority = int(payload.get("priority", 3))
+    owner = str(payload.get("owner", "self"))
+    note = str(payload.get("note", ""))
+    next_action = str(payload.get("next_action", ""))
+    try:
+        item = upsert_workflow_task_payload(
+            db,
+            product_id=product_id,
+            region=region,
+            status=status,
+            priority=priority,
+            owner=owner,
+            note=note,
+            next_action=next_action,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "ok", "item": item}
+
+
+@router.post("/workflow/task/quick-add")
+def quick_add_workflow_task(payload: dict[str, Any], db: Session = Depends(get_db)) -> dict[str, Any]:
+    product_id = int(payload.get("product_id", 0))
+    region = str(payload.get("region", "")).strip()
+    if product_id <= 0 or not region:
+        raise HTTPException(status_code=400, detail="product_id and region are required")
+    try:
+        item = upsert_workflow_task_payload(
+            db,
+            product_id=product_id,
+            region=region,
+            status=str(payload.get("status", "待测试")),
+            priority=int(payload.get("priority", 2)),
+            owner=str(payload.get("owner", "self")),
+            note=str(payload.get("note", "来自产品池快捷加入")),
+            next_action=str(payload.get("next_action", "先做 3 套素材测试 CTR")),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"status": "ok", "item": item}
+
+
+@router.delete("/workflow/task/{task_id}")
+def delete_workflow_task(task_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
+    try:
+        return delete_workflow_task_payload(db, task_id=task_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/ai/explain")

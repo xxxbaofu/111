@@ -75,6 +75,7 @@ class Product(Base):
     category: Mapped["Category"] = relationship(back_populates="products")
     metrics: Mapped[list["DailyMetric"]] = relationship(back_populates="product")
     ads: Mapped[list["Ad"]] = relationship(back_populates="product")
+    workflow_tasks: Mapped[list["WorkflowTask"]] = relationship(back_populates="product")
 
     __table_args__ = (UniqueConstraint("name_en", "market", name="uq_product_name_market"),)
 
@@ -121,3 +122,26 @@ class HeadLeader(Base):
     score: Mapped[float] = mapped_column(Float, default=0)
     growth: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class WorkflowTask(Base):
+    __tablename__ = "workflow_tasks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
+    market: Mapped[str] = mapped_column(String(20), index=True)
+    status: Mapped[str] = mapped_column(String(20), index=True, default="待测试")
+    priority: Mapped[int] = mapped_column(Integer, default=3)
+    owner: Mapped[str] = mapped_column(String(80), default="self")
+    note: Mapped[str] = mapped_column(Text, default="")
+    next_action: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+    )
+
+    product: Mapped["Product"] = relationship(back_populates="workflow_tasks")
+
+    __table_args__ = (UniqueConstraint("product_id", "market", name="uq_workflow_product_market"),)

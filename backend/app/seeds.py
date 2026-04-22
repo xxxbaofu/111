@@ -6,7 +6,15 @@ from datetime import date, datetime, timedelta
 from random import Random
 
 from app.db import SessionLocal
-from app.models.entities import Ad, Category, DailyMetric, HeadLeader, Product, RegionCode
+from app.models.entities import (
+    Ad,
+    Category,
+    DailyMetric,
+    HeadLeader,
+    Product,
+    RegionCode,
+    WorkflowTask,
+)
 from app.services.scoring import calc_total_score
 
 
@@ -123,6 +131,19 @@ def seed_demo() -> None:
                         growth=product.growth_score,
                     )
                 )
+
+                if idx < 4:
+                    db.add(
+                        WorkflowTask(
+                            product_id=product.id,
+                            market=region.value,
+                            status="待测试" if idx < 2 else "测试中",
+                            priority=1 if idx == 0 else 2,
+                            owner="self",
+                            note="种子任务：优先验证 CTR 与 CVR。",
+                            next_action="补充 3 套素材后开始小预算投放",
+                        )
+                    )
 
             for category in region_categories:
                 products = (

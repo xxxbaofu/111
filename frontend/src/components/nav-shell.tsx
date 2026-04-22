@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Compass, Layers, Megaphone, Rocket, TrendingUp, Wrench } from "lucide-react";
+import {
+  BarChart3,
+  Compass,
+  Layers,
+  Megaphone,
+  Rocket,
+  SquareKanban,
+  TrendingUp,
+  Wrench,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
 type NavItem = {
@@ -16,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/market-pulse", label: "市场脉冲", icon: <TrendingUp className="h-4 w-4" /> },
   { href: "/category", label: "品类雷达", icon: <Compass className="h-4 w-4" /> },
   { href: "/products", label: "产品机会池", icon: <Layers className="h-4 w-4" /> },
+  { href: "/workflow", label: "执行看板", icon: <SquareKanban className="h-4 w-4" /> },
   { href: "/ads", label: "广告洞察", icon: <Megaphone className="h-4 w-4" /> },
   { href: "/leaders", label: "头部榜单", icon: <Rocket className="h-4 w-4" /> },
   { href: "/growth", label: "增长中心", icon: <TrendingUp className="h-4 w-4" /> },

@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
-from app.models.entities import Ad, Category, DailyMetric, HeadLeader, Product
+from app.models.entities import Ad, Category, DailyMetric, HeadLeader, Product, WorkflowTask
 
 
 def _product_to_payload(product: Product) -> dict[str, Any]:
@@ -131,6 +131,24 @@ def get_product_payload(db: Session, *, product_id: int) -> dict[str, Any] | Non
         }
         for ad in ads
     ]
+    payload["decision"] = {
+        "conclusion": product.recommendation or "观望",
+        "why": (
+            f"热度 {product.heat_score:.2f}、增长 {product.growth_score:.3f}、"
+            f"讨论 {product.discussion_score:.2f}、竞争 {product.competition_score:.1f}"
+        ),
+        "how": product.strategy_type or "先做 2-3 条素材测试，验证 CTR 与 CVR。",
+        "budget": {
+            "daily": round(float(product.budget_daily), 2),
+            "test": round(float(product.budget_test), 2),
+            "scale": round(float(product.budget_scale), 2),
+        },
+        "risk": (
+            "竞争偏高，注意素材同质化与 CPM 抬升。"
+            if float(product.competition_score) >= 60
+            else "关注履约与库存周转，避免断货影响放量。"
+        ),
+    }
     return payload
 
 
@@ -383,3 +401,109 @@ def get_workbench_payload(db: Session, *, region: str) -> dict[str, Any]:
         "top_products": products["items"][:8],
         "decisions": decisions["items"],
     }
+
+
+def list_workflow_tasks_payload(db: Session, *, region: str) -> dict[str, Any]:
+    rows = db.execute(
+        select(
+            WorkflowTask.id,
+            WorkflowTask.product_id,
+            WorkflowTask.market,
+            WorkflowTask.status,
+            WorkflowTask.priority,
+            WorkflowTask.owner,
+            WorkflowTask.note,
+            WorkflowTask.next_action,
+            WorkflowTask.updated_at,
+            Product.name_cn,
+            Product.total_score,
+            Product.budget_daily,
+            Product.recommendation,
+        )
+        .join(Product, Product.id == WorkflowTask.product_id)
+        .where(WorkflowTask.market == region)
+        .order_by(WorkflowTask.status, WorkflowTask.priority, desc(Product.total_score))
+    ).all()
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        items.append(
+            {
+                "id": int(row.id),
+                "product_id": int(row.product_id),
+                "product_name": str(row.name_cn),
+                "market": str(row.market),
+                "status": str(row.status),
+                "priority": int(row.priority),
+                "owner": str(row.owner),
+                "note": str(row.note or ""),
+                "next_action": str(row.next_action or ""),
+                "score": round(float(row.total_score or 0), 2),
+                "budget_daily": round(float(row.budget_daily or 0), 2),
+                "recommendation": str(row.recommendation or ""),
+                "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+            }
+        )
+    return {"region": region, "count": len(items), "items": items}
+
+
+def upsert_workflow_task_payload(
+    db: Session,
+    *,
+    product_id: int,
+    region: str,
+    status: str,
+    priority: int = 3,
+    owner: str = "self",
+    note: str = "",
+    next_action: str = "",
+) -> dict[str, Any]:
+    product = db.get(Product, product_id)
+    if product is None:
+        raise ValueError("Product not found")
+
+    existing = db.scalar(
+        select(WorkflowTask).where(
+            WorkflowTask.product_id == product_id,
+            WorkflowTask.market == region,
+        )
+    )
+    if existing is None:
+        existing = WorkflowTask(
+            product_id=product_id,
+            market=region,
+            status=status,
+            priority=priority,
+            owner=owner,
+            note=note,
+            next_action=next_action,
+        )
+        db.add(existing)
+    else:
+        existing.status = status
+        existing.priority = priority
+        existing.owner = owner
+        existing.note = note
+        existing.next_action = next_action
+
+    db.commit()
+    db.refresh(existing)
+    return {
+        "id": int(existing.id),
+        "product_id": int(existing.product_id),
+        "market": str(existing.market),
+        "status": str(existing.status),
+        "priority": int(existing.priority),
+        "owner": str(existing.owner),
+        "note": str(existing.note or ""),
+        "next_action": str(existing.next_action or ""),
+        "updated_at": existing.updated_at.isoformat() if existing.updated_at else None,
+    }
+
+
+def delete_workflow_task_payload(db: Session, *, task_id: int) -> dict[str, Any]:
+    item = db.get(WorkflowTask, task_id)
+    if item is None:
+        raise ValueError("Workflow task not found")
+    db.delete(item)
+    db.commit()
+    return {"deleted": True, "task_id": task_id}

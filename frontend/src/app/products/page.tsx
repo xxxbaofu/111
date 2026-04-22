@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/badge";
@@ -100,10 +101,10 @@ export default function ProductsPage() {
         <>
           <TableCard
             title={`产品列表（${region}）`}
-            description="字段不求多，重点看：分数、预算、推荐等级。"
-            columns={["产品", "市场", "分数", "热度", "增长", "竞争", "预算", "建议"]}
+            description="字段不求多，重点看：分数、预算、推荐等级。点击产品可进入作战详情。"
+            columns={["产品", "市场", "分数", "热度", "增长", "竞争", "预算", "建议", "操作"]}
             rows={list.map((item) => [
-              item.name_cn,
+              `${item.name_cn}（${item.name_en}）`,
               item.market,
               item.score.toFixed(1),
               item.heat_score.toFixed(2),
@@ -111,8 +112,30 @@ export default function ProductsPage() {
               item.competition_score.toFixed(1),
               `$${item.budget_daily.toFixed(0)}/day`,
               item.recommendation,
+              `查看 /product/${item.id}?region=${region}`,
             ])}
           />
+
+          <section className="card">
+            <h2 className="text-lg font-semibold">快捷入口</h2>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              <Link
+                className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                href={`/workflow?region=${region}`}
+              >
+                打开执行看板
+              </Link>
+              {list.slice(0, 3).map((item) => (
+                <Link
+                  key={item.id}
+                  className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                  href={`/workflow?region=${region}&add_product=${item.id}`}
+                >
+                  加入看板：{item.name_cn}
+                </Link>
+              ))}
+            </div>
+          </section>
 
           <section className="card">
             <h2 className="text-lg font-semibold">AI 决策解释（Top 8）</h2>
