@@ -1,8 +1,55 @@
 import { TableCard } from "@/components/table-card";
-import { getSystemStatus } from "@/lib/api";
+import { getSystemStatus, simulateBudget, simulatePortfolioBudget, type Region } from "@/lib/api";
 
-export default async function StrategyPage() {
+type StrategyPageProps = {
+  searchParams?: Promise<{ region?: Region }>;
+};
+
+export default async function StrategyPage({ searchParams }: StrategyPageProps) {
+  const params = (await searchParams) ?? {};
+  const region = params.region ?? "US";
   const status = await getSystemStatus();
+  const budgetCases = await Promise.all([
+    simulateBudget({
+      platform: "TikTok",
+      budget: 60,
+      cpm: 8.5,
+      ctr: 0.018,
+      cvr: 0.03,
+      aov: 32,
+    }),
+    simulateBudget({
+      platform: "Meta",
+      budget: 80,
+      cpm: 10.5,
+      ctr: 0.014,
+      cvr: 0.035,
+      aov: 39,
+    }),
+    simulateBudget({
+      platform: "Google",
+      budget: 100,
+      cpm: 12.8,
+      ctr: 0.021,
+      cvr: 0.04,
+      aov: 45,
+    }),
+  ]);
+  const portfolio = await simulatePortfolioBudget({
+    total_budget: 220,
+    cpm_tiktok: 8.5,
+    cpm_meta: 10.5,
+    cpm_google: 12.8,
+    ctr_tiktok: 0.018,
+    ctr_meta: 0.014,
+    ctr_google: 0.021,
+    cvr_tiktok: 0.03,
+    cvr_meta: 0.035,
+    cvr_google: 0.04,
+    aov_tiktok: 32,
+    aov_meta: 39,
+    aov_google: 45,
+  });
   const rows: Array<Array<string | number>> = [
     ["TikTok", "$20-$60/day", "短视频痛点切入 + UGC 素材测试 + 24h 快迭代"],
     ["Meta", "$30-$90/day", "高客单价值锚定 + 图片/短视频双素材并行"],
@@ -27,7 +74,7 @@ export default async function StrategyPage() {
       <section className="rounded-xl border border-white/10 bg-white/5 p-4">
         <h1 className="text-2xl font-semibold text-slate-100">投流与玩法 Strategy</h1>
         <p className="mt-2 text-sm text-[var(--text-muted)]">
-          这里不是看数据大盘，而是给你每天可执行的固定动作：预算分配、素材迭代、系统巡检。
+          当前区域：{region}。这里不是看数据大盘，而是给你每天可执行的固定动作：预算分配、素材迭代、系统巡检。
         </p>
       </section>
       <TableCard
@@ -45,6 +92,48 @@ export default async function StrategyPage() {
         description="预算从小到大，先验证后放量，避免单日大亏。"
         columns={["平台", "建议预算", "执行建议"]}
         rows={rows}
+      />
+      <TableCard
+        title="多平台预算模拟器（示例参数）"
+        description="你可以把这里的参数当模板：核心看 ROAS 与 CPA 是否在可接受区间。"
+        columns={["平台", "预算", "CPM", "CTR", "CVR", "客单价", "曝光", "点击", "订单", "收入", "ROAS", "CPA"]}
+        rows={budgetCases.map((item) => [
+          item.platform,
+          `$${item.inputs.budget}`,
+          item.inputs.cpm,
+          `${(item.inputs.ctr * 100).toFixed(2)}%`,
+          `${(item.inputs.cvr * 100).toFixed(2)}%`,
+          `$${item.inputs.aov}`,
+          item.outputs.impressions,
+          item.outputs.clicks,
+          item.outputs.orders.toFixed(2),
+          `$${item.outputs.revenue.toFixed(2)}`,
+          item.outputs.roas.toFixed(2),
+          `$${item.outputs.cpa.toFixed(2)}`,
+        ])}
+      />
+      <TableCard
+        title="组合预算模拟（TikTok / Meta / Google）"
+        description="按 45% / 35% / 20% 自动分配总预算，输出整体 ROAS 与 blended CPA。"
+        columns={["平台", "预算", "收入", "订单", "ROAS", "CPA"]}
+        rows={[
+          ...portfolio.channels.map((item) => [
+            item.platform,
+            `$${item.inputs.budget}`,
+            `$${item.outputs.revenue.toFixed(2)}`,
+            item.outputs.orders.toFixed(2),
+            item.outputs.roas.toFixed(2),
+            `$${item.outputs.cpa.toFixed(2)}`,
+          ]),
+          [
+            "组合汇总",
+            `$${portfolio.total_budget.toFixed(2)}`,
+            `$${portfolio.summary.revenue.toFixed(2)}`,
+            portfolio.summary.orders.toFixed(2),
+            portfolio.summary.blended_roas.toFixed(2),
+            `$${portfolio.summary.blended_cpa.toFixed(2)}`,
+          ],
+        ]}
       />
       <TableCard
         title="品类打法模板"

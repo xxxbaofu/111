@@ -64,12 +64,20 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
           </p>
           <p className="text-sm text-[var(--danger)]">风险：{detail.decision?.risk ?? "需关注供应链稳定性"}</p>
           <div className="pt-2">
-            <Link
-              href={`/workflow?region=${region}`}
-              className="inline-flex items-center rounded-md border border-[var(--accent-blue)] bg-[var(--accent-blue)]/20 px-3 py-2 text-xs text-white"
-            >
-              去执行看板更新状态
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href={`/workflow?region=${region}`}
+                className="inline-flex items-center rounded-md border border-[var(--accent-blue)] bg-[var(--accent-blue)]/20 px-3 py-2 text-xs text-white"
+              >
+                去执行看板更新状态
+              </Link>
+              <Link
+                href={`/bookmarks?region=${region}&action=add_product&product_id=${productId}`}
+                className="inline-flex items-center rounded-md border border-[var(--accent)] bg-[var(--accent)]/15 px-3 py-2 text-xs text-[var(--accent)]"
+              >
+                收藏该产品
+              </Link>
+            </div>
           </div>
         </div>
       </section>

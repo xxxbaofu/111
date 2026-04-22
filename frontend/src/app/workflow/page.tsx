@@ -1,6 +1,7 @@
 import { TableCard } from "@/components/table-card";
 import {
   deleteWorkflowTask,
+  getWorkflowHistory,
   getWorkflowTasks,
   upsertWorkflowTask,
   type Region,
@@ -8,7 +9,12 @@ import {
 } from "@/lib/api";
 
 type WorkflowPageProps = {
-  searchParams?: Promise<{ region?: Region; action?: "seed" | "cleanup"; task_id?: string }>;
+  searchParams?: Promise<{
+    region?: Region;
+    action?: "seed" | "cleanup" | "add_product";
+    task_id?: string;
+    product_id?: string;
+  }>;
 };
 
 const REGION_OPTIONS: Region[] = ["US", "UK", "EU", "SEA", "JP", "KR", "XHS"];
@@ -16,8 +22,9 @@ const STATUS_ORDER: Array<WorkflowTaskRow["status"]> = ["待测试", "测试中"
 
 async function _applyQuickAction(
   region: Region,
-  action?: "seed" | "cleanup",
-  taskIdRaw?: string
+  action?: "seed" | "cleanup" | "add_product",
+  taskIdRaw?: string,
+  productIdRaw?: string
 ): Promise<void> {
   if (action === "seed") {
     const base = await getWorkflowTasks(region);
@@ -42,14 +49,29 @@ async function _applyQuickAction(
       await deleteWorkflowTask(taskId);
     }
   }
+  if (action === "add_product" && productIdRaw) {
+    const productId = Number(productIdRaw);
+    if (Number.isFinite(productId) && productId > 0) {
+      await upsertWorkflowTask({
+        product_id: productId,
+        region,
+        status: "待测试",
+        priority: 2,
+        owner: "self",
+        note: "来自产品池快捷加入",
+        next_action: "先上 3 套素材并观察前 24h CTR/CVR",
+      });
+    }
+  }
 }
 
 export default async function WorkflowPage({ searchParams }: WorkflowPageProps) {
   const params = (await searchParams) ?? {};
   const region = params.region ?? "US";
-  await _applyQuickAction(region, params.action, params.task_id);
+  await _applyQuickAction(region, params.action, params.task_id, params.product_id);
 
   const tasks = await getWorkflowTasks(region);
+  const histories = await getWorkflowHistory({ region, limit: 12 });
   const grouped = STATUS_ORDER.map((status) => ({
     status,
     rows: tasks.items.filter((item) => item.status === status),
@@ -117,6 +139,19 @@ export default async function WorkflowPage({ searchParams }: WorkflowPageProps) 
           />
         ))}
       </section>
+
+      <TableCard
+        title="最近操作轨迹"
+        description="每次状态更新都会记录，方便你复盘是怎么做出当前结果的。"
+        columns={["时间", "产品", "动作", "状态变化", "备注"]}
+        rows={histories.items.map((item) => [
+          item.created_at ? item.created_at.slice(0, 16).replace("T", " ") : "-",
+          item.product_name,
+          item.action,
+          `${item.from_status || "空"} -> ${item.to_status || "空"}`,
+          item.note || "-",
+        ])}
+      />
 
       <section className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-[var(--text-muted)]">
         快速操作：点击上方“自动创建今日任务”会从高分产品自动生成待测试任务。删除任务可用：

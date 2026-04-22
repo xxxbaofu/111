@@ -225,6 +225,87 @@ export type WorkflowTasksResponse = {
   items: WorkflowTaskRow[];
 };
 
+export type WorkflowHistoryRow = {
+  id: number;
+  task_id: number;
+  market: string;
+  product_name: string;
+  action: string;
+  from_status: string;
+  to_status: string;
+  note: string;
+  created_at: string | null;
+};
+
+export type WorkflowHistoryResponse = {
+  region: Region;
+  count: number;
+  items: WorkflowHistoryRow[];
+};
+
+export type BookmarkRow = {
+  id: number;
+  market: string;
+  entity_type: "product" | "category";
+  product_id: number | null;
+  category_name: string;
+  title: string;
+  note: string;
+  updated_at: string | null;
+};
+
+export type BookmarksResponse = {
+  region: Region;
+  count: number;
+  items: BookmarkRow[];
+};
+
+export type DailyReportResponse = {
+  region: Region;
+  date: string;
+  kpis: MarketResponse["kpis"];
+  top_products: ProductRow[];
+  decisions: DecisionRow[];
+  workflow_summary: Record<string, number>;
+  risk_alerts: DecisionRow[];
+  budget_suggestion: {
+    total_daily_budget: number;
+    core_test_budget: number;
+    explore_budget: number;
+    reserve_budget: number;
+  };
+};
+
+export type BudgetSimulatorResponse = {
+  platform: string;
+  inputs: {
+    budget: number;
+    cpm: number;
+    ctr: number;
+    cvr: number;
+    aov: number;
+  };
+  outputs: {
+    impressions: number;
+    clicks: number;
+    orders: number;
+    revenue: number;
+    roas: number;
+    cpa: number;
+  };
+};
+
+export type MultiPlatformBudgetSimulatorResponse = {
+  total_budget: number;
+  channels: BudgetSimulatorResponse[];
+  summary: {
+    revenue: number;
+    orders: number;
+    blended_roas: number;
+    blended_cpa: number;
+  };
+};
+
 export async function getMarket(region: Region): Promise<MarketResponse> {
   return req(`/market?${toQuery({ region })}`);
 }
@@ -277,6 +358,13 @@ export async function getWorkflowTasks(region: Region): Promise<WorkflowTasksRes
   return req(`/workflow/tasks?${toQuery({ region })}`);
 }
 
+export async function getWorkflowHistory(params: {
+  region: Region;
+  limit?: number;
+}): Promise<WorkflowHistoryResponse> {
+  return req(`/workflow/history?${toQuery(params)}`);
+}
+
 export async function upsertWorkflowTask(payload: {
   product_id: number;
   region: Region;
@@ -291,6 +379,60 @@ export async function upsertWorkflowTask(payload: {
 
 export async function deleteWorkflowTask(taskId: number): Promise<{ deleted: boolean; task_id: number }> {
   return req(`/workflow/task/${taskId}`, { method: "DELETE" });
+}
+
+export async function getBookmarks(region: Region): Promise<BookmarksResponse> {
+  return req(`/bookmarks?${toQuery({ region })}`);
+}
+
+export async function upsertBookmark(payload: {
+  region: Region;
+  entity_type: "product" | "category";
+  product_id?: number;
+  category_name?: string;
+  title?: string;
+  note?: string;
+}): Promise<{ status: string; item: BookmarkRow }> {
+  return req("/bookmark", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function deleteBookmark(
+  bookmarkId: number
+): Promise<{ deleted: boolean; bookmark_id: number }> {
+  return req(`/bookmark/${bookmarkId}`, { method: "DELETE" });
+}
+
+export async function getDailyReport(region: Region): Promise<DailyReportResponse> {
+  return req(`/daily-report?${toQuery({ region })}`);
+}
+
+export async function simulateBudget(params: {
+  platform: string;
+  budget: number;
+  cpm: number;
+  ctr: number;
+  cvr: number;
+  aov: number;
+}): Promise<BudgetSimulatorResponse> {
+  return req(`/budget/simulate?${toQuery(params)}`);
+}
+
+export async function simulatePortfolioBudget(params: {
+  total_budget: number;
+  cpm_tiktok: number;
+  cpm_meta: number;
+  cpm_google: number;
+  ctr_tiktok: number;
+  ctr_meta: number;
+  ctr_google: number;
+  cvr_tiktok: number;
+  cvr_meta: number;
+  cvr_google: number;
+  aov_tiktok: number;
+  aov_meta: number;
+  aov_google: number;
+}): Promise<MultiPlatformBudgetSimulatorResponse> {
+  return req(`/budget/simulate/portfolio?${toQuery(params)}`);
 }
 
 export async function getProduct(id: number): Promise<ProductDetailResponse> {

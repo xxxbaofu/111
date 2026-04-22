@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
+
 type TableCardProps = {
   title: string;
   columns: string[];
-  rows: (string | number)[][];
+  rows: ReactNode[][];
   desc?: string;
   description?: string;
 };

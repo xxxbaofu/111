@@ -11,7 +11,9 @@ from app.db import get_db
 from app.services.ai_explain import build_ai_explanation
 from app.services.queries import (
     get_ads_by_product,
+    get_budget_simulator_payload,
     get_categories_payload,
+    get_daily_report_payload,
     get_decisions_payload,
     get_growth_payload,
     get_leaders_payload,
@@ -20,10 +22,15 @@ from app.services.queries import (
     get_regions_overview_payload,
     get_system_status_payload,
     get_workbench_payload,
+    get_multi_platform_budget_simulator_payload,
     list_products_payload,
     list_workflow_tasks_payload,
+    list_workflow_history_payload,
+    list_bookmarks_payload,
     upsert_workflow_task_payload,
     delete_workflow_task_payload,
+    upsert_bookmark_payload,
+    delete_bookmark_payload,
 )
 from app.tasks.seed import seed_sample_data
 
@@ -180,6 +187,111 @@ def delete_workflow_task(task_id: int, db: Session = Depends(get_db)) -> dict[st
         return delete_workflow_task_payload(db, task_id=task_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/workflow/history")
+def workflow_history(
+    region: str,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return list_workflow_history_payload(db, region=region, limit=limit)
+
+
+@router.get("/bookmarks")
+def bookmarks(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    return list_bookmarks_payload(db, region=region)
+
+
+@router.post("/bookmark")
+def upsert_bookmark(payload: dict[str, Any], db: Session = Depends(get_db)) -> dict[str, Any]:
+    region = str(payload.get("region", "")).strip()
+    entity_type = str(payload.get("entity_type", "")).strip()
+    product_id_raw = payload.get("product_id")
+    product_id = int(product_id_raw) if product_id_raw not in (None, "") else None
+    category_name = str(payload.get("category_name", "")).strip()
+    title = str(payload.get("title", "")).strip()
+    note = str(payload.get("note", "")).strip()
+    if not region:
+        raise HTTPException(status_code=400, detail="region is required")
+    try:
+        item = upsert_bookmark_payload(
+            db,
+            region=region,
+            entity_type=entity_type,
+            product_id=product_id,
+            category_name=category_name,
+            title=title,
+            note=note,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"status": "ok", "item": item}
+
+
+@router.delete("/bookmark/{bookmark_id}")
+def delete_bookmark(bookmark_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
+    try:
+        return delete_bookmark_payload(db, bookmark_id=bookmark_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/daily-report")
+def daily_report(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    return get_daily_report_payload(db, region=region)
+
+
+@router.get("/budget/simulate")
+def budget_simulate(
+    platform: str,
+    budget: float,
+    cpm: float,
+    ctr: float,
+    cvr: float,
+    aov: float,
+) -> dict[str, Any]:
+    return get_budget_simulator_payload(
+        platform=platform,
+        budget=budget,
+        cpm=cpm,
+        ctr=ctr,
+        cvr=cvr,
+        aov=aov,
+    )
+
+
+@router.get("/budget/simulate/portfolio")
+def budget_simulate_portfolio(
+    total_budget: float,
+    cpm_tiktok: float = 8.5,
+    cpm_meta: float = 10.5,
+    cpm_google: float = 12.8,
+    ctr_tiktok: float = 0.018,
+    ctr_meta: float = 0.014,
+    ctr_google: float = 0.021,
+    cvr_tiktok: float = 0.03,
+    cvr_meta: float = 0.035,
+    cvr_google: float = 0.04,
+    aov_tiktok: float = 32.0,
+    aov_meta: float = 39.0,
+    aov_google: float = 45.0,
+) -> dict[str, Any]:
+    return get_multi_platform_budget_simulator_payload(
+        total_budget=total_budget,
+        cpm_tiktok=cpm_tiktok,
+        cpm_meta=cpm_meta,
+        cpm_google=cpm_google,
+        ctr_tiktok=ctr_tiktok,
+        ctr_meta=ctr_meta,
+        ctr_google=ctr_google,
+        cvr_tiktok=cvr_tiktok,
+        cvr_meta=cvr_meta,
+        cvr_google=cvr_google,
+        aov_tiktok=aov_tiktok,
+        aov_meta=aov_meta,
+        aov_google=aov_google,
+    )
 
 
 @router.post("/ai/explain")

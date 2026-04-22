@@ -5,7 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/badge";
 import { TableCard } from "@/components/table-card";
-import { getDecisions, getProducts, type DecisionRow, type ProductRow, type Region } from "@/lib/api";
+import {
+  getDecisions,
+  getProducts,
+  upsertBookmark,
+  type DecisionRow,
+  type ProductRow,
+  type Region,
+} from "@/lib/api";
 
 const REGIONS: Region[] = ["US", "UK", "EU", "SEA", "JP", "KR", "XHS"];
 
@@ -17,6 +24,7 @@ export default function ProductsPage() {
   const [minScore, setMinScore] = useState(0);
   const [maxCompetition, setMaxCompetition] = useState(100);
   const [beginnerOnly, setBeginnerOnly] = useState(false);
+  const [bookmarkingId, setBookmarkingId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +54,20 @@ export default function ProductsPage() {
       return true;
     });
   }, [rows, minScore, maxCompetition, beginnerOnly]);
+
+  const addBookmark = async (item: ProductRow) => {
+    setBookmarkingId(item.id);
+    try {
+      await upsertBookmark({
+        region,
+        entity_type: "product",
+        product_id: item.id,
+        note: "来自产品池快捷收藏",
+      });
+    } finally {
+      setBookmarkingId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -125,6 +147,12 @@ export default function ProductsPage() {
               >
                 打开执行看板
               </Link>
+              <Link
+                className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                href={`/bookmarks?region=${region}`}
+              >
+                打开收藏与备注
+              </Link>
               {list.slice(0, 3).map((item) => (
                 <Link
                   key={item.id}
@@ -133,6 +161,16 @@ export default function ProductsPage() {
                 >
                   加入看板：{item.name_cn}
                 </Link>
+              ))}
+              {list.slice(0, 3).map((item) => (
+                <button
+                  key={`bookmark-${item.id}`}
+                  className="rounded-md border border-white/15 px-2 py-1 hover:border-white/30"
+                  onClick={() => addBookmark(item)}
+                  disabled={bookmarkingId === item.id}
+                >
+                  {bookmarkingId === item.id ? "收藏中..." : `收藏：${item.name_cn}`}
+                </button>
               ))}
             </div>
           </section>

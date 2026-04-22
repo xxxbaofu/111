@@ -8,7 +8,16 @@ from typing import Any
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
-from app.models.entities import Ad, Category, DailyMetric, HeadLeader, Product, WorkflowTask
+from app.models.entities import (
+    Ad,
+    Bookmark,
+    Category,
+    DailyMetric,
+    HeadLeader,
+    Product,
+    WorkflowHistory,
+    WorkflowTask,
+)
 
 
 def _product_to_payload(product: Product) -> dict[str, Any]:
@@ -467,6 +476,7 @@ def upsert_workflow_task_payload(
             WorkflowTask.market == region,
         )
     )
+    previous_status = existing.status if existing is not None else ""
     if existing is None:
         existing = WorkflowTask(
             product_id=product_id,
@@ -484,6 +494,16 @@ def upsert_workflow_task_payload(
         existing.owner = owner
         existing.note = note
         existing.next_action = next_action
+
+    history = WorkflowHistory(
+        task=existing,
+        market=region,
+        action="create" if previous_status == "" else "update",
+        from_status=previous_status,
+        to_status=status,
+        note=note,
+    )
+    db.add(history)
 
     db.commit()
     db.refresh(existing)
@@ -504,6 +524,287 @@ def delete_workflow_task_payload(db: Session, *, task_id: int) -> dict[str, Any]
     item = db.get(WorkflowTask, task_id)
     if item is None:
         raise ValueError("Workflow task not found")
+    db.query(WorkflowHistory).filter(WorkflowHistory.task_id == task_id).delete(
+        synchronize_session=False
+    )
     db.delete(item)
     db.commit()
     return {"deleted": True, "task_id": task_id}
+
+
+def list_workflow_history_payload(db: Session, *, region: str, limit: int = 100) -> dict[str, Any]:
+    rows = db.execute(
+        select(
+            WorkflowHistory.id,
+            WorkflowHistory.task_id,
+            WorkflowHistory.market,
+            WorkflowHistory.action,
+            WorkflowHistory.from_status,
+            WorkflowHistory.to_status,
+            WorkflowHistory.note,
+            WorkflowHistory.created_at,
+            Product.name_cn,
+        )
+        .join(WorkflowTask, WorkflowTask.id == WorkflowHistory.task_id)
+        .join(Product, Product.id == WorkflowTask.product_id)
+        .where(WorkflowHistory.market == region)
+        .order_by(desc(WorkflowHistory.created_at))
+        .limit(limit)
+    ).all()
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        items.append(
+            {
+                "id": int(row.id),
+                "task_id": int(row.task_id),
+                "market": str(row.market),
+                "product_name": str(row.name_cn),
+                "action": str(row.action),
+                "from_status": str(row.from_status or ""),
+                "to_status": str(row.to_status or ""),
+                "note": str(row.note or ""),
+                "created_at": row.created_at.isoformat() if row.created_at else None,
+            }
+        )
+    return {"region": region, "count": len(items), "items": items}
+
+
+def list_bookmarks_payload(db: Session, *, region: str) -> dict[str, Any]:
+    rows = db.execute(
+        select(
+            Bookmark.id,
+            Bookmark.market,
+            Bookmark.entity_type,
+            Bookmark.product_id,
+            Bookmark.category_name,
+            Bookmark.title,
+            Bookmark.note,
+            Bookmark.updated_at,
+            Product.name_cn,
+        )
+        .outerjoin(Product, Product.id == Bookmark.product_id)
+        .where(Bookmark.market == region)
+        .order_by(desc(Bookmark.updated_at))
+    ).all()
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        title = str(row.title or "")
+        if not title:
+            title = str(row.name_cn or row.category_name or "")
+        items.append(
+            {
+                "id": int(row.id),
+                "market": str(row.market),
+                "entity_type": str(row.entity_type),
+                "product_id": int(row.product_id) if row.product_id is not None else None,
+                "category_name": str(row.category_name or ""),
+                "title": title,
+                "note": str(row.note or ""),
+                "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+            }
+        )
+    return {"region": region, "count": len(items), "items": items}
+
+
+def upsert_bookmark_payload(
+    db: Session,
+    *,
+    region: str,
+    entity_type: str,
+    product_id: int | None = None,
+    category_name: str = "",
+    title: str = "",
+    note: str = "",
+) -> dict[str, Any]:
+    if entity_type not in {"product", "category"}:
+        raise ValueError("entity_type must be product or category")
+    if entity_type == "product" and (product_id is None or product_id <= 0):
+        raise ValueError("product_id is required for product bookmark")
+    if entity_type == "category" and not category_name:
+        raise ValueError("category_name is required for category bookmark")
+
+    existing = db.scalar(
+        select(Bookmark).where(
+            Bookmark.market == region,
+            Bookmark.entity_type == entity_type,
+            Bookmark.product_id == (product_id if entity_type == "product" else None),
+            Bookmark.category_name == (category_name if entity_type == "category" else ""),
+        )
+    )
+
+    if existing is None:
+        existing = Bookmark(
+            market=region,
+            entity_type=entity_type,
+            product_id=product_id if entity_type == "product" else None,
+            category_name=category_name if entity_type == "category" else "",
+            title=title,
+            note=note,
+        )
+        db.add(existing)
+    else:
+        existing.title = title
+        existing.note = note
+
+    db.commit()
+    db.refresh(existing)
+    return {
+        "id": int(existing.id),
+        "market": str(existing.market),
+        "entity_type": str(existing.entity_type),
+        "product_id": int(existing.product_id) if existing.product_id is not None else None,
+        "category_name": str(existing.category_name or ""),
+        "title": str(existing.title or ""),
+        "note": str(existing.note or ""),
+        "updated_at": existing.updated_at.isoformat() if existing.updated_at else None,
+    }
+
+
+def delete_bookmark_payload(db: Session, *, bookmark_id: int) -> dict[str, Any]:
+    item = db.get(Bookmark, bookmark_id)
+    if item is None:
+        raise ValueError("Bookmark not found")
+    db.delete(item)
+    db.commit()
+    return {"deleted": True, "bookmark_id": bookmark_id}
+
+
+def get_daily_report_payload(db: Session, *, region: str) -> dict[str, Any]:
+    market = get_market_payload(db, region=region)
+    top_products = list_products_payload(db, region=region, min_score=65)["items"][:5]
+    decisions = get_decisions_payload(db, region=region, top_n=5)["items"]
+    workflow = list_workflow_tasks_payload(db, region=region)["items"]
+    workflow_summary = {
+        "待测试": len([x for x in workflow if x["status"] == "待测试"]),
+        "测试中": len([x for x in workflow if x["status"] == "测试中"]),
+        "复盘中": len([x for x in workflow if x["status"] == "复盘中"]),
+        "停投": len([x for x in workflow if x["status"] == "停投"]),
+    }
+    risk_items = [
+        x
+        for x in decisions
+        if "风险" in x["risk"] or "竞争" in x["risk"] or "CPM" in x["risk"]
+    ][:3]
+    budget_total = sum(float(item.get("budget_daily", 0)) for item in top_products)
+    return {
+        "region": region,
+        "date": date.today().isoformat(),
+        "kpis": market["kpis"],
+        "top_products": top_products,
+        "decisions": decisions,
+        "workflow_summary": workflow_summary,
+        "risk_alerts": risk_items,
+        "budget_suggestion": {
+            "total_daily_budget": round(budget_total, 2),
+            "core_test_budget": round(budget_total * 0.6, 2),
+            "explore_budget": round(budget_total * 0.25, 2),
+            "reserve_budget": round(budget_total * 0.15, 2),
+        },
+    }
+
+
+def get_budget_simulator_payload(
+    *,
+    platform: str,
+    budget: float,
+    cpm: float,
+    ctr: float,
+    cvr: float,
+    aov: float,
+) -> dict[str, Any]:
+    # impressions = budget / CPM * 1000
+    impressions = (budget / max(cpm, 0.01)) * 1000.0
+    clicks = impressions * max(ctr, 0.0)
+    orders = clicks * max(cvr, 0.0)
+    revenue = orders * max(aov, 0.0)
+    roas = revenue / max(budget, 0.01)
+    cpa = budget / max(orders, 0.01)
+    return {
+        "platform": platform,
+        "inputs": {
+            "budget": round(budget, 2),
+            "cpm": round(cpm, 2),
+            "ctr": round(ctr, 4),
+            "cvr": round(cvr, 4),
+            "aov": round(aov, 2),
+        },
+        "outputs": {
+            "impressions": round(impressions, 0),
+            "clicks": round(clicks, 0),
+            "orders": round(orders, 2),
+            "revenue": round(revenue, 2),
+            "roas": round(roas, 2),
+            "cpa": round(cpa, 2),
+        },
+    }
+
+
+def get_multi_platform_budget_simulator_payload(
+    *,
+    total_budget: float,
+    cpm_tiktok: float,
+    cpm_meta: float,
+    cpm_google: float,
+    ctr_tiktok: float,
+    ctr_meta: float,
+    ctr_google: float,
+    cvr_tiktok: float,
+    cvr_meta: float,
+    cvr_google: float,
+    aov_tiktok: float,
+    aov_meta: float,
+    aov_google: float,
+) -> dict[str, Any]:
+    split = {
+        "TikTok": total_budget * 0.45,
+        "Meta": total_budget * 0.35,
+        "Google": total_budget * 0.20,
+    }
+    tiktok = get_budget_simulator_payload(
+        platform="TikTok",
+        budget=split["TikTok"],
+        cpm=cpm_tiktok,
+        ctr=ctr_tiktok,
+        cvr=cvr_tiktok,
+        aov=aov_tiktok,
+    )
+    meta = get_budget_simulator_payload(
+        platform="Meta",
+        budget=split["Meta"],
+        cpm=cpm_meta,
+        ctr=ctr_meta,
+        cvr=cvr_meta,
+        aov=aov_meta,
+    )
+    google = get_budget_simulator_payload(
+        platform="Google",
+        budget=split["Google"],
+        cpm=cpm_google,
+        ctr=ctr_google,
+        cvr=cvr_google,
+        aov=aov_google,
+    )
+
+    revenue = (
+        float(tiktok["outputs"]["revenue"])
+        + float(meta["outputs"]["revenue"])
+        + float(google["outputs"]["revenue"])
+    )
+    orders = (
+        float(tiktok["outputs"]["orders"])
+        + float(meta["outputs"]["orders"])
+        + float(google["outputs"]["orders"])
+    )
+    roas = revenue / max(total_budget, 0.01)
+    blended_cpa = total_budget / max(orders, 0.01)
+
+    return {
+        "total_budget": round(total_budget, 2),
+        "channels": [tiktok, meta, google],
+        "summary": {
+            "revenue": round(revenue, 2),
+            "orders": round(orders, 2),
+            "blended_roas": round(roas, 2),
+            "blended_cpa": round(blended_cpa, 2),
+        },
+    }

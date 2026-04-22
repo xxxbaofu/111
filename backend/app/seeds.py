@@ -8,11 +8,13 @@ from random import Random
 from app.db import SessionLocal
 from app.models.entities import (
     Ad,
+    Bookmark,
     Category,
     DailyMetric,
     HeadLeader,
     Product,
     RegionCode,
+    WorkflowHistory,
     WorkflowTask,
 )
 from app.services.scoring import calc_total_score
@@ -133,15 +135,35 @@ def seed_demo() -> None:
                 )
 
                 if idx < 4:
+                    task = WorkflowTask(
+                        product_id=product.id,
+                        market=region.value,
+                        status="待测试" if idx < 2 else "测试中",
+                        priority=1 if idx == 0 else 2,
+                        owner="self",
+                        note="种子任务：优先验证 CTR 与 CVR。",
+                        next_action="补充 3 套素材后开始小预算投放",
+                    )
+                    db.add(task)
+                    db.flush()
                     db.add(
-                        WorkflowTask(
-                            product_id=product.id,
+                        WorkflowHistory(
+                            task_id=task.id,
                             market=region.value,
-                            status="待测试" if idx < 2 else "测试中",
-                            priority=1 if idx == 0 else 2,
-                            owner="self",
-                            note="种子任务：优先验证 CTR 与 CVR。",
-                            next_action="补充 3 套素材后开始小预算投放",
+                            action="create",
+                            from_status="",
+                            to_status=task.status,
+                            note=task.note,
+                        )
+                    )
+                if idx < 2:
+                    db.add(
+                        Bookmark(
+                            market=region.value,
+                            entity_type="product",
+                            product_id=product.id,
+                            title=f"重点跟踪：{product.name_cn}",
+                            note="关注广告素材衰减速度与评论区真实反馈。",
                         )
                     )
 

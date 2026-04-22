@@ -76,6 +76,7 @@ class Product(Base):
     metrics: Mapped[list["DailyMetric"]] = relationship(back_populates="product")
     ads: Mapped[list["Ad"]] = relationship(back_populates="product")
     workflow_tasks: Mapped[list["WorkflowTask"]] = relationship(back_populates="product")
+    bookmarks: Mapped[list["Bookmark"]] = relationship(back_populates="product")
 
     __table_args__ = (UniqueConstraint("name_en", "market", name="uq_product_name_market"),)
 
@@ -143,5 +144,41 @@ class WorkflowTask(Base):
     )
 
     product: Mapped["Product"] = relationship(back_populates="workflow_tasks")
+    histories: Mapped[list["WorkflowHistory"]] = relationship(back_populates="task")
 
     __table_args__ = (UniqueConstraint("product_id", "market", name="uq_workflow_product_market"),)
+
+
+class WorkflowHistory(Base):
+    __tablename__ = "workflow_histories"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("workflow_tasks.id"), index=True)
+    market: Mapped[str] = mapped_column(String(20), index=True)
+    action: Mapped[str] = mapped_column(String(80), default="update")
+    from_status: Mapped[str] = mapped_column(String(20), default="")
+    to_status: Mapped[str] = mapped_column(String(20), default="")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+    task: Mapped["WorkflowTask"] = relationship(back_populates="histories")
+
+
+class Bookmark(Base):
+    __tablename__ = "bookmarks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    market: Mapped[str] = mapped_column(String(20), index=True)
+    entity_type: Mapped[str] = mapped_column(String(20), index=True, default="product")
+    product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id"), nullable=True, index=True)
+    category_name: Mapped[str] = mapped_column(String(120), default="")
+    title: Mapped[str] = mapped_column(String(200), default="")
+    note: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
+    )
+
+    product: Mapped["Product | None"] = relationship(back_populates="bookmarks")

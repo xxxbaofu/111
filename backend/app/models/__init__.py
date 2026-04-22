@@ -2,13 +2,25 @@
 
 from app.models.entities import (
     Ad,
+    Bookmark,
     Category,
     DailyMetric,
     HeadLeader,
     Product,
     RegionCode,
+    WorkflowHistory,
     WorkflowTask,
 )
 
-__all__ = ["Ad", "Category", "DailyMetric", "HeadLeader", "Product", "RegionCode", "WorkflowTask"]
+__all__ = [
+    "Ad",
+    "Bookmark",
+    "Category",
+    "DailyMetric",
+    "HeadLeader",
+    "Product",
+    "RegionCode",
+    "WorkflowHistory",
+    "WorkflowTask",
+]
 
