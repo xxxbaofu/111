@@ -73,6 +73,17 @@ CREATE TABLE IF NOT EXISTS product_aliases (
     normalized_name TEXT PRIMARY KEY,
     display_name_cn TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    favorite_type TEXT NOT NULL,           -- product / category
+    favorite_key TEXT NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT '准备测试', -- 准备测试 / 已测试 / 放弃
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(favorite_type, favorite_key)
+);
 """
 
 
@@ -231,6 +242,41 @@ class Database:
             rows = conn.execute(query).fetchall()
         return {str(row["normalized_name"]): str(row["display_name_cn"]) for row in rows}
 
+    def upsert_favorite(
+        self,
+        *,
+        favorite_type: str,
+        favorite_key: str,
+        note: str = "",
+        status: str = "准备测试",
+    ) -> None:
+        now = datetime.utcnow().isoformat()
+        query = """
+        INSERT INTO favorites (favorite_type, favorite_key, note, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(favorite_type, favorite_key) DO UPDATE SET
+            note=excluded.note,
+            status=excluded.status,
+            updated_at=excluded.updated_at
+        """
+        with self._connect() as conn:
+            conn.execute(query, (favorite_type, favorite_key, note, status, now, now))
+
+    def delete_favorite(self, *, favorite_type: str, favorite_key: str) -> None:
+        query = "DELETE FROM favorites WHERE favorite_type = ? AND favorite_key = ?"
+        with self._connect() as conn:
+            conn.execute(query, (favorite_type, favorite_key))
+
+    def fetch_favorites(self, favorite_type: str | None = None) -> list[sqlite3.Row]:
+        if favorite_type:
+            query = "SELECT * FROM favorites WHERE favorite_type = ? ORDER BY updated_at DESC"
+            params = (favorite_type,)
+        else:
+            query = "SELECT * FROM favorites ORDER BY updated_at DESC"
+            params: tuple = ()
+        with self._connect() as conn:
+            return conn.execute(query, params).fetchall()
+
     def fetch_raw_posts_without_products(self) -> list[PersistedRawPost]:
         query = """
         SELECT rp.*
@@ -297,12 +343,30 @@ class Database:
 
     def fetch_joined_results(self) -> list[sqlite3.Row]:
         query = """
+        WITH market_summary AS (
+            SELECT
+                product_id,
+                AVG(price) AS avg_price,
+                MIN(price) AS min_price,
+                MAX(price) AS max_price,
+                AVG(review_count) AS avg_reviews
+            FROM market_data
+            GROUP BY product_id
+        )
         SELECT
             p.id AS product_id,
             p.name AS product_name,
             p.category,
             p.emotion_tag,
             rp.platform,
+            rp.created_at,
+            rp.views,
+            rp.likes,
+            rp.comments,
+            COALESCE(ms.avg_price, 0) AS avg_price,
+            COALESCE(ms.min_price, 0) AS min_price,
+            COALESCE(ms.max_price, 0) AS max_price,
+            COALESCE(ms.avg_reviews, 0) AS avg_reviews,
             s.trend_score,
             s.profit_score,
             s.competition_score,
@@ -317,6 +381,7 @@ class Database:
         FROM scores s
         JOIN products p ON p.id = s.product_id
         JOIN raw_posts rp ON rp.id = p.raw_post_id
+        LEFT JOIN market_summary ms ON ms.product_id = p.id
         ORDER BY s.total_score DESC
         """
         with self._connect() as conn:
