@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #0b1020;
-  --bg-card: #12182b;
-  --bg-hover: #1a2340;
+  --bg-main: #0a0f1d;
+  --bg-surface: #0f1629;
+  --bg-card: #121b31;
+  --bg-hover: #1a2544;
   --text-main: #f4f7fe;
-  --text-muted: #9ca8c3;
+  --text-muted: #96a6c8;
+  --border-main: #223154;
+  --border-soft: #1a2744;
   --up: #22c55e;
   --down: #ef4444;
   --boom: #f97316;
@@ -38,12 +41,29 @@ body {
   border-radius: 12px;
   padding: 16px;
   background: var(--bg-card);
-  border: 1px solid #1f2948;
+  border: 1px solid var(--border-main);
   box-shadow: 0 4px 14px rgba(4, 8, 18, 0.22);
 }
 
 .card:hover {
   background: var(--bg-hover);
+}
+
+.panel {
+  border-radius: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.section-desc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .tag {

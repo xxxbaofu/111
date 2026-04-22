@@ -9,7 +9,6 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.models.entities import Ad, Category, DailyMetric, HeadLeader, Product
-from app.services.scoring import calc_total_score
 
 
 def _product_to_payload(product: Product) -> dict[str, Any]:
@@ -247,3 +246,140 @@ def get_leaders_payload(db: Session, *, region: str) -> dict[str, Any]:
         }
         grouped.setdefault(row.type, []).append(item)
     return {"region": region, "leaders": grouped}
+
+
+def get_categories_payload(
+    db: Session,
+    *,
+    region: str,
+    keyword: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+) -> dict[str, Any]:
+    stmt = select(Category).where(Category.market == region)
+    if keyword:
+        stmt = stmt.where(Category.name.ilike(f"%{keyword}%"))
+    categories = db.scalars(stmt.order_by(desc(Category.growth_score))).all()
+
+    rows: list[dict[str, Any]] = []
+    for cat in categories:
+        if min_price is not None and float(cat.avg_price) < float(min_price):
+            continue
+        if max_price is not None and float(cat.avg_price) > float(max_price):
+            continue
+        rows.append(
+            {
+                "id": cat.id,
+                "name": cat.name,
+                "market": cat.market,
+                "heat_score": round(float(cat.heat_score), 3),
+                "growth_score": round(float(cat.growth_score), 3),
+                "avg_price": round(float(cat.avg_price), 2),
+                "product_count": int(cat.product_count),
+            }
+        )
+    return {"region": region, "count": len(rows), "items": rows}
+
+
+def get_regions_overview_payload(db: Session) -> dict[str, Any]:
+    rows = db.execute(
+        select(
+            Product.market.label("region"),
+            func.count(Product.id).label("product_count"),
+            func.avg(Product.growth_score).label("avg_growth"),
+            func.avg(Product.total_score).label("avg_score"),
+            func.avg(Product.budget_daily).label("avg_budget_daily"),
+        )
+        .group_by(Product.market)
+        .order_by(desc("avg_growth"))
+    ).all()
+
+    items = [
+        {
+            "region": str(row.region),
+            "product_count": int(row.product_count or 0),
+            "avg_growth": round(float(row.avg_growth or 0), 3),
+            "avg_score": round(float(row.avg_score or 0), 2),
+            "avg_budget_daily": round(float(row.avg_budget_daily or 0), 2),
+            "judgement": (
+                "优先投入"
+                if float(row.avg_growth or 0) >= 0.45 and float(row.avg_score or 0) >= 70
+                else "可小测"
+                if float(row.avg_growth or 0) >= 0.2
+                else "观望"
+            ),
+        }
+        for row in rows
+    ]
+    return {"count": len(items), "items": items}
+
+
+def get_decisions_payload(db: Session, *, region: str, top_n: int = 10) -> dict[str, Any]:
+    items = db.scalars(
+        select(Product)
+        .where(Product.market == region)
+        .order_by(desc(Product.total_score), desc(Product.growth_score))
+        .limit(top_n)
+    ).all()
+    out: list[dict[str, Any]] = []
+    for item in items:
+        conclusion = item.recommendation or "观望"
+        why = (
+            f"热度 {item.heat_score:.2f}、增长 {item.growth_score:.3f}、讨论 {item.discussion_score:.2f}"
+        )
+        if not why:
+            why = "当前数据不足，建议先采样观察。"
+        how = item.strategy_type or "先做小预算素材测试，验证 CTR 与 CVR。"
+        budget = (
+            f"测试 ${item.budget_test:.0f}，日预算 ${item.budget_daily:.0f}，起量 ${item.budget_scale:.0f}"
+        )
+        risk = (
+            "竞争偏高，注意素材同质化和 CPM 上涨。"
+            if item.competition_score >= 60
+            else "供应链和履约节奏是主要风险。"
+        )
+        out.append(
+            {
+                "product_id": item.id,
+                "name_cn": item.name_cn,
+                "name_en": item.name_en,
+                "region": item.market,
+                "score": round(float(item.total_score), 2),
+                "conclusion": conclusion,
+                "why": why,
+                "how": how,
+                "budget": budget,
+                "risk": risk,
+            }
+        )
+    return {"region": region, "count": len(out), "items": out}
+
+
+def get_system_status_payload(db: Session) -> dict[str, Any]:
+    product_count = db.scalar(select(func.count(Product.id))) or 0
+    category_count = db.scalar(select(func.count(Category.id))) or 0
+    ads_count = db.scalar(select(func.count(Ad.id))) or 0
+    metric_count = db.scalar(select(func.count(DailyMetric.id))) or 0
+    latest_metric = db.scalar(select(func.max(DailyMetric.date)))
+    return {
+        "database": "ok" if product_count > 0 else "empty",
+        "products": int(product_count),
+        "categories": int(category_count),
+        "ads": int(ads_count),
+        "daily_metrics": int(metric_count),
+        "latest_metric_date": latest_metric.isoformat() if latest_metric else None,
+    }
+
+
+def get_workbench_payload(db: Session, *, region: str) -> dict[str, Any]:
+    market = get_market_payload(db, region=region)
+    categories = get_categories_payload(db, region=region)
+    products = list_products_payload(db, region=region, min_score=60)
+    decisions = get_decisions_payload(db, region=region, top_n=8)
+    return {
+        "region": region,
+        "market": market,
+        "top_categories": categories["items"][:8],
+        "top_products": products["items"][:8],
+        "decisions": decisions["items"],
+    }

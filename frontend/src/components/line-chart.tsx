@@ -5,9 +5,10 @@ import ReactECharts from "echarts-for-react";
 type LineChartProps = {
   x: string[];
   series: { name: string; data: number[] }[];
+  height?: number;
 };
 
-export function LineChart({ x, series }: LineChartProps) {
+export function LineChart({ x, series, height = 320 }: LineChartProps) {
   const option = {
     tooltip: { trigger: "axis" },
     legend: { textStyle: { color: "#9CA8C3" } },
@@ -28,9 +29,10 @@ export function LineChart({ x, series }: LineChartProps) {
       type: "line",
       smooth: true,
       data: item.data,
-      lineStyle: { width: 2 },
+      lineStyle: { width: 2.4 },
       color: idx % 2 === 0 ? "#22C55E" : "#3B82F6",
+      areaStyle: { opacity: 0.08 },
     })),
   };
-  return <ReactECharts option={option} style={{ height: 320 }} />;
+  return <ReactECharts option={option} style={{ height }} />;
 }

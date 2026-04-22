@@ -15,10 +15,10 @@ const toneMap: Record<NonNullable<KpiCardProps["tone"]>, string> = {
 
 export function KpiCard({ title, value, hint, tone = "blue" }: KpiCardProps) {
   return (
-    <div className="rounded-xl border border-[#1A2340] bg-[#12182B] p-4 shadow-sm transition hover:brightness-105">
-      <div className="text-sm text-[#9CA8C3]">{title}</div>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition hover:bg-[var(--surface-hover)]">
+      <div className="text-sm text-[var(--text-muted)]">{title}</div>
       <div className={`mt-2 text-3xl font-bold ${toneMap[tone]}`}>{value}</div>
-      {hint ? <div className="mt-2 text-xs text-[#9CA8C3]">{hint}</div> : null}
+      {hint ? <div className="mt-2 text-xs text-[var(--text-muted)]">{hint}</div> : null}
     </div>
   );
 }

@@ -118,6 +118,60 @@ export type AdsResponse = {
   }>;
 };
 
+export type CategoryResponse = {
+  region: string;
+  count: number;
+  items: Array<{
+    id: number;
+    name: string;
+    market: string;
+    heat_score: number;
+    growth_score: number;
+    avg_price: number;
+    product_count: number;
+  }>;
+};
+
+export type RegionOverviewResponse = {
+  count: number;
+  items: Array<{
+    region: string;
+    product_count: number;
+    avg_growth: number;
+    avg_score: number;
+    avg_budget_daily: number;
+    judgement: string;
+  }>;
+};
+
+export type DecisionResponse = {
+  region: string;
+  count: number;
+  items: Array<{
+    product_id: number;
+    name_cn: string;
+    name_en: string;
+    region: string;
+    score: number;
+    conclusion: string;
+    why: string;
+    how: string;
+    budget: string;
+    risk: string;
+  }>;
+};
+
+export type DecisionRow = DecisionResponse["items"][number];
+
+export type SystemStatusResponse = {
+  database: string;
+  products: number;
+  categories: number;
+  ads: number;
+  daily_metrics: number;
+  latest_metric_date: string | null;
+};
+
 export type ProductDetailResponse = ProductRow & {
   category: { id: number; name: string; market: string };
   daily_metrics: Array<{
@@ -134,6 +188,10 @@ export async function getMarket(region: Region): Promise<MarketResponse> {
   return req(`/market?${toQuery({ region })}`);
 }
 
+export async function getMarketsOverview(): Promise<RegionOverviewResponse> {
+  return req("/markets/overview");
+}
+
 export async function getProducts(params: {
   region: Region;
   category?: string;
@@ -142,12 +200,32 @@ export async function getProducts(params: {
   return req(`/products?${toQuery(params)}`);
 }
 
+export async function getCategories(params: {
+  region: Region;
+  keyword?: string;
+  min_price?: number;
+  max_price?: number;
+}): Promise<CategoryResponse> {
+  return req(`/categories?${toQuery(params)}`);
+}
+
 export async function getGrowth(region: Region): Promise<GrowthResponse> {
   return req(`/growth?${toQuery({ region })}`);
 }
 
 export async function getLeaders(region: Region): Promise<LeadersResponse> {
   return req(`/leaders?${toQuery({ region })}`);
+}
+
+export async function getDecisions(params: {
+  region: Region;
+  top_n?: number;
+}): Promise<DecisionResponse> {
+  return req(`/decisions?${toQuery(params)}`);
+}
+
+export async function getSystemStatus(): Promise<SystemStatusResponse> {
+  return req("/system/status");
 }
 
 export async function getProduct(id: number): Promise<ProductDetailResponse> {

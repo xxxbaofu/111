@@ -11,10 +11,14 @@ from app.db import get_db
 from app.services.ai_explain import build_ai_explanation
 from app.services.queries import (
     get_ads_by_product,
+    get_categories_payload,
+    get_decisions_payload,
     get_growth_payload,
     get_leaders_payload,
     get_market_payload,
     get_product_payload,
+    get_regions_overview_payload,
+    get_system_status_payload,
     list_products_payload,
 )
 from app.tasks.seed import seed_sample_data
@@ -33,6 +37,11 @@ def market(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     return get_market_payload(db, region=region)
 
 
+@router.get("/markets/overview")
+def markets_overview(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return get_regions_overview_payload(db)
+
+
 @router.get("/products")
 def products(
     region: str,
@@ -45,6 +54,23 @@ def products(
         region=region,
         category=category,
         min_score=min_score,
+    )
+
+
+@router.get("/categories")
+def categories(
+    region: str,
+    keyword: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return get_categories_payload(
+        db,
+        region=region,
+        keyword=keyword,
+        min_price=min_price,
+        max_price=max_price,
     )
 
 
@@ -69,6 +95,20 @@ def ads(product_id: int, db: Session = Depends(get_db)) -> dict[str, Any]:
 @router.get("/leaders")
 def leaders(region: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     return get_leaders_payload(db, region=region)
+
+
+@router.get("/decisions")
+def decisions(
+    region: str,
+    top_n: int = 10,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    return get_decisions_payload(db, region=region, top_n=top_n)
+
+
+@router.get("/system/status")
+def system_status(db: Session = Depends(get_db)) -> dict[str, Any]:
+    return get_system_status_payload(db)
 
 
 @router.post("/ai/explain")
