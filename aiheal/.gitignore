@@ -1,0 +1,19 @@
+# deps
+node_modules/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# tsbuild
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# misc
+.DS_Store
+npm-debug.log*
