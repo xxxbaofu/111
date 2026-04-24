@@ -74,7 +74,22 @@ python main.py --mode stage --stage output
 python main.py --mode schedule
 ```
 
-## Streamlit 可视化后台
+## AIHeal 多页站点
+
+```bash
+streamlit run Home.py --server.port 8501 --server.headless true
+```
+
+页面结构：
+- Home
+- Product
+- Demo
+- Scenarios
+- Technology
+- Download
+- Developers
+
+## Selection Radar 旧版可视化后台
 
 ```bash
 streamlit run selection_radar/dashboard.py --server.port 8501 --server.headless true
