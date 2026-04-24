@@ -1,4 +1,35 @@
-# Selection Radar v0.1
+# AIHeal / Selection Radar
+
+当前仓库包含两套界面能力：
+
+1. **AIHeal**：面向用户与产品展示的多页面健康 AI 站点（Streamlit 实现）
+2. **Selection Radar**：原有的分析流水线与内部数据控制台
+
+## AIHeal 站点
+
+AIHeal 是一个围绕健康评分、趋势分析、AI 报告和行动建议构建的展示站点，默认入口已经切换到它。
+
+站点信息架构由结构化内容文件驱动：
+
+- `content/aiheal_site.json`
+
+默认启动方式：
+
+```bash
+streamlit run selection_radar/dashboard.py --server.port 8501 --server.headless true
+```
+
+已包含页面：
+
+- 首页
+- 产品
+- Demo 报告
+- 使用场景
+- 技术
+- 下载
+- 开发者
+
+## Selection Radar 原有能力
 
 自动发现跨境赚钱机会（不是 Top 榜单），按以下流程执行：
 
@@ -8,7 +39,7 @@
 4. 评分（趋势 + 利润 + 蓝海 + 情绪 + 新趋势）
 5. 机会分类与输出（JSON + Markdown）
 
-## v0.2 已实现范围
+### v0.2 已实现范围
 
 - 数据源：
   - TikTok（Apify 在线抓取，失败自动回退）
@@ -74,13 +105,21 @@ python main.py --mode stage --stage output
 python main.py --mode schedule
 ```
 
-## Streamlit 可视化后台
+## Streamlit 界面
+
+默认站点入口（AIHeal）：
 
 ```bash
 streamlit run selection_radar/dashboard.py --server.port 8501 --server.headless true
 ```
 
-看板功能：
+原始内部分析控制台：
+
+```bash
+streamlit run selection_radar/analytics_dashboard.py --server.port 8501 --server.headless true
+```
+
+Selection Radar 控制台功能：
 - 一键运行全流程
 - 指标卡片（机会数/平均分/建议测试数/新趋势数）
 - 分类分布图

@@ -1,0 +1,948 @@
+{
+  "site": {
+    "name": "AIHeal",
+    "tagline": {
+      "zh": "AI 健康管家",
+      "en": "Your AI Health Copilot"
+    },
+    "page_labels": {
+      "home": {
+        "zh": "首页",
+        "en": "Home"
+      },
+      "product": {
+        "zh": "产品",
+        "en": "Product"
+      },
+      "demo": {
+        "zh": "Demo 报告",
+        "en": "Demo"
+      },
+      "scenarios": {
+        "zh": "使用场景",
+        "en": "Scenarios"
+      },
+      "technology": {
+        "zh": "技术",
+        "en": "Technology"
+      },
+      "download": {
+        "zh": "下载",
+        "en": "Download"
+      },
+      "developers": {
+        "zh": "开发者",
+        "en": "Developers"
+      }
+    },
+    "structure": [
+      {
+        "page": "home",
+        "sections": [
+          "hero",
+          "core_features",
+          "demo_report",
+          "use_cases",
+          "data_sources",
+          "cta",
+          "infrastructure",
+          "developer_entry"
+        ]
+      },
+      {
+        "page": "product",
+        "sections": [
+          "overview",
+          "health_snapshot",
+          "trend_tracking",
+          "ai_report",
+          "comparison"
+        ]
+      },
+      {
+        "page": "demo",
+        "sections": [
+          "full_report",
+          "analysis_logic",
+          "risk_detection",
+          "action_plan"
+        ]
+      },
+      {
+        "page": "scenarios",
+        "sections": [
+          "office_workers",
+          "family_health",
+          "fitness_users",
+          "chronic_conditions"
+        ]
+      },
+      {
+        "page": "technology",
+        "sections": [
+          "data_ownership",
+          "privacy",
+          "ai_model",
+          "decentralization"
+        ]
+      },
+      {
+        "page": "download",
+        "sections": [
+          "ios",
+          "android",
+          "qr_code"
+        ]
+      },
+      {
+        "page": "developers",
+        "sections": [
+          "api",
+          "agent",
+          "sdk"
+        ]
+      }
+    ],
+    "home_ui": {
+      "hero": {
+        "title": {
+          "zh": "AI 健康管家",
+          "en": "Your AI Health Copilot"
+        },
+        "subtitle": {
+          "zh": "用数据理解你的身体，而不是猜",
+          "en": "Understand your body through data, not guesswork"
+        },
+        "description": {
+          "zh": "AI 自动分析你的健康数据，发现潜在风险，并生成可执行的健康建议",
+          "en": "AI analyzes your health signals, detects risks, and generates actionable insights for everyday wellbeing"
+        },
+        "primary_cta": {
+          "zh": "立即体验",
+          "en": "Try it now"
+        },
+        "secondary_cta": {
+          "zh": "查看示例报告",
+          "en": "View sample report"
+        }
+      },
+      "core_features": [
+        {
+          "key": "health_score",
+          "title": {
+            "zh": "健康评分",
+            "en": "Health Score"
+          },
+          "description": {
+            "zh": "实时生成你的健康状态评分",
+            "en": "Generate a real-time snapshot of your current health state"
+          }
+        },
+        {
+          "key": "trend_analysis",
+          "title": {
+            "zh": "趋势分析",
+            "en": "Trend Tracking"
+          },
+          "description": {
+            "zh": "追踪睡眠、心率、活动变化",
+            "en": "Track changes across sleep, heart rate, and activity"
+          }
+        },
+        {
+          "key": "ai_report",
+          "title": {
+            "zh": "AI 报告",
+            "en": "AI Report"
+          },
+          "description": {
+            "zh": "发现风险并给出行动建议",
+            "en": "Detect risks and recommend what to do next"
+          }
+        }
+      ],
+      "use_cases": [
+        {
+          "key": "office_workers",
+          "title": {
+            "zh": "打工人",
+            "en": "Office workers"
+          },
+          "description": {
+            "zh": "睡眠差但不知道原因，交给 AI 做连续分析",
+            "en": "Understand why sleep quality is slipping before it affects daily energy"
+          }
+        },
+        {
+          "key": "family_health",
+          "title": {
+            "zh": "家庭",
+            "en": "Family health"
+          },
+          "description": {
+            "zh": "父母健康变化出现异常时自动提醒",
+            "en": "Receive early reminders when family health patterns begin to change"
+          }
+        },
+        {
+          "key": "fitness_users",
+          "title": {
+            "zh": "健身",
+            "en": "Fitness users"
+          },
+          "description": {
+            "zh": "用数据优化训练强度和恢复节奏",
+            "en": "Use recovery and activity signals to train more effectively"
+          }
+        }
+      ],
+      "data_sources": [
+        {
+          "zh": "Apple Health",
+          "en": "Apple Health"
+        },
+        {
+          "zh": "智能设备",
+          "en": "Wearables"
+        },
+        {
+          "zh": "手动输入",
+          "en": "Manual input"
+        },
+        {
+          "zh": "医疗报告",
+          "en": "Medical reports"
+        }
+      ],
+      "infrastructure": {
+        "title": "Personal Health AI Infrastructure",
+        "pillars": [
+          {
+            "key": "data_ownership",
+            "title": {
+              "zh": "数据主权",
+              "en": "Data ownership"
+            }
+          },
+          {
+            "key": "privacy",
+            "title": {
+              "zh": "隐私保护",
+              "en": "Privacy protection"
+            }
+          },
+          {
+            "key": "decentralization",
+            "title": {
+              "zh": "去中心化",
+              "en": "Decentralization"
+            }
+          }
+        ]
+      }
+    },
+    "product_page": {
+      "headline": {
+        "zh": "把零散健康数据变成清晰判断",
+        "en": "Turn fragmented health data into clear decisions"
+      },
+      "description": {
+        "zh": "从每日记录到 AI 解释，AIHeal 帮你持续理解身体状态，而不是盯着原始数值猜。",
+        "en": "From daily signals to AI explanation, AIHeal helps you understand your health over time instead of guessing from raw numbers."
+      },
+      "overview": [
+        {
+          "title": {
+            "zh": "统一健康快照",
+            "en": "Unified health snapshot"
+          },
+          "description": {
+            "zh": "把 Apple Health、穿戴设备和手动记录汇总成一个可读视图。",
+            "en": "Bring Apple Health, wearables, and manual logs into one readable view."
+          }
+        },
+        {
+          "title": {
+            "zh": "连续趋势追踪",
+            "en": "Continuous trend tracking"
+          },
+          "description": {
+            "zh": "比单次读数更重要的是变化方向，AIHeal 会持续观察异常偏移。",
+            "en": "Direction matters more than one-off readings, so AIHeal watches for meaningful shifts over time."
+          }
+        },
+        {
+          "title": {
+            "zh": "可执行 AI 结论",
+            "en": "Actionable AI conclusions"
+          },
+          "description": {
+            "zh": "不仅发现问题，还会告诉你为什么发生、要先做什么。",
+            "en": "It does not just flag problems. It explains why they may be happening and what to do first."
+          }
+        }
+      ],
+      "health_snapshot": {
+        "title": {
+          "zh": "健康快照",
+          "en": "Health snapshot"
+        },
+        "description": {
+          "zh": "每天先给用户结果，再展开解释。",
+          "en": "Give users a result first, then explain what it means."
+        },
+        "metrics": [
+          {
+            "label": {
+              "zh": "今日评分",
+              "en": "Today's score"
+            },
+            "value": "82 / 100"
+          },
+          {
+            "label": {
+              "zh": "睡眠准备度",
+              "en": "Sleep readiness"
+            },
+            "value": "74"
+          },
+          {
+            "label": {
+              "zh": "恢复状态",
+              "en": "Recovery"
+            },
+            "value": "81"
+          },
+          {
+            "label": {
+              "zh": "压力负荷",
+              "en": "Stress load"
+            },
+            "value": {
+              "zh": "中等",
+              "en": "Moderate"
+            }
+          }
+        ]
+      },
+      "trend_tracking": {
+        "title": {
+          "zh": "趋势追踪",
+          "en": "Trend tracking"
+        },
+        "description": {
+          "zh": "系统会关注睡眠、心率、活动与恢复之间的联动变化，而不是只看单一指标。",
+          "en": "The system looks at how sleep, heart rate, activity, and recovery move together instead of isolating one metric."
+        },
+        "bullets": [
+          {
+            "zh": "识别短期波动和长期下滑",
+            "en": "Spot short-term swings and long-term decline"
+          },
+          {
+            "zh": "突出与你个人基线不一致的信号",
+            "en": "Highlight signals that are off your personal baseline"
+          },
+          {
+            "zh": "把变化趋势翻译成通俗结论",
+            "en": "Translate changing patterns into plain-language takeaways"
+          }
+        ]
+      },
+      "ai_report": {
+        "title": {
+          "zh": "AI 报告",
+          "en": "AI report"
+        },
+        "description": {
+          "zh": "每次分析都围绕一个简单问题：现在最值得注意的是什么，以及接下来该做什么。",
+          "en": "Every report centers on a simple question: what matters most right now, and what should happen next."
+        },
+        "bullets": [
+          {
+            "zh": "关键发现：突出变化最大的健康信号",
+            "en": "Key findings: surface the health signals that changed most"
+          },
+          {
+            "zh": "风险提示：说明近期可能出现的问题",
+            "en": "Risk alerts: explain what may happen in the near term"
+          },
+          {
+            "zh": "行动建议：按优先级给出下一步",
+            "en": "Action plan: suggest what to do next in priority order"
+          }
+        ]
+      },
+      "comparison": {
+        "title": {
+          "zh": "为什么 AIHeal 更适合日常健康管理",
+          "en": "Why AIHeal works better for everyday health management"
+        },
+        "rows": [
+          {
+            "dimension": {
+              "zh": "输入方式",
+              "en": "Input"
+            },
+            "aiheal": {
+              "zh": "自动汇聚多源健康信号",
+              "en": "Automatically combines multiple health signals"
+            },
+            "legacy": {
+              "zh": "用户自己翻看分散数据",
+              "en": "Users read disconnected data on their own"
+            }
+          },
+          {
+            "dimension": {
+              "zh": "结果呈现",
+              "en": "Output"
+            },
+            "aiheal": {
+              "zh": "先给评分，再解释原因",
+              "en": "Starts with a score, then explains why"
+            },
+            "legacy": {
+              "zh": "原始数值很多，结论很少",
+              "en": "Many raw numbers, few clear conclusions"
+            }
+          },
+          {
+            "dimension": {
+              "zh": "风险识别",
+              "en": "Risk detection"
+            },
+            "aiheal": {
+              "zh": "关注异常偏移与趋势组合",
+              "en": "Detects unusual drift and signal combinations"
+            },
+            "legacy": {
+              "zh": "依赖用户自己意识到变化",
+              "en": "Relies on users noticing changes themselves"
+            }
+          },
+          {
+            "dimension": {
+              "zh": "建议执行",
+              "en": "Recommendations"
+            },
+            "aiheal": {
+              "zh": "输出可执行的日常行动",
+              "en": "Provides concrete next steps for daily action"
+            },
+            "legacy": {
+              "zh": "通常只给图表，不给优先级",
+              "en": "Usually provides charts without prioritization"
+            }
+          }
+        ]
+      }
+    },
+    "demo_page": {
+      "headline": {
+        "zh": "一份让用户立刻相信的示例报告",
+        "en": "A sample report that builds trust instantly"
+      },
+      "description": {
+        "zh": "不登录、不填资料，也能先看懂 AIHeal 会输出什么结果。",
+        "en": "No login and no form required. Users can see exactly what AIHeal produces before they commit."
+      },
+      "analysis_logic": {
+        "title": {
+          "zh": "分析逻辑",
+          "en": "Analysis logic"
+        },
+        "steps": [
+          {
+            "title": {
+              "zh": "收集信号",
+              "en": "Collect signals"
+            },
+            "body": {
+              "zh": "整合睡眠、心率、活动、手动输入和历史报告。",
+              "en": "Combine sleep, heart rate, activity, manual input, and historical reports."
+            }
+          },
+          {
+            "title": {
+              "zh": "匹配基线",
+              "en": "Compare to baseline"
+            },
+            "body": {
+              "zh": "判断当前变化是否偏离了你的个人正常区间。",
+              "en": "Check whether current changes are drifting away from your personal baseline."
+            }
+          },
+          {
+            "title": {
+              "zh": "识别风险",
+              "en": "Detect risk"
+            },
+            "body": {
+              "zh": "识别疲劳累积、恢复不足、作息混乱等模式。",
+              "en": "Detect patterns such as accumulated fatigue, weak recovery, and irregular routines."
+            }
+          },
+          {
+            "title": {
+              "zh": "生成建议",
+              "en": "Generate actions"
+            },
+            "body": {
+              "zh": "把分析结果压缩成用户今天就能执行的计划。",
+              "en": "Turn the analysis into a plan the user can act on today."
+            }
+          }
+        ]
+      },
+      "risk_detection": {
+        "title": {
+          "zh": "风险识别",
+          "en": "Risk detection"
+        },
+        "items": [
+          {
+            "title": {
+              "zh": "疲劳累积",
+              "en": "Accumulating fatigue"
+            },
+            "body": {
+              "zh": "连续多天睡眠缩短，恢复信号不足。",
+              "en": "Sleep has shortened across several days while recovery signals remain weak."
+            },
+            "severity": "medium"
+          },
+          {
+            "title": {
+              "zh": "夜间压力偏高",
+              "en": "Elevated nighttime stress"
+            },
+            "body": {
+              "zh": "夜间心率偏高，说明身心放松不足。",
+              "en": "Nighttime heart rate is elevated, suggesting incomplete relaxation."
+            },
+            "severity": "medium"
+          },
+          {
+            "title": {
+              "zh": "作息不稳定",
+              "en": "Irregular routine"
+            },
+            "body": {
+              "zh": "入睡时间持续后移，影响恢复质量。",
+              "en": "Bedtime keeps shifting later, which can degrade recovery quality."
+            },
+            "severity": "high"
+          }
+        ]
+      },
+      "action_plan": {
+        "title": {
+          "zh": "行动计划",
+          "en": "Action plan"
+        },
+        "items": [
+          {
+            "zh": "今晚提前 30 分钟入睡",
+            "en": "Go to bed 30 minutes earlier tonight"
+          },
+          {
+            "zh": "晚间减少蓝光并降低工作刺激",
+            "en": "Reduce blue light and mental stimulation in the evening"
+          },
+          {
+            "zh": "明天安排一次轻度有氧恢复",
+            "en": "Schedule light aerobic recovery tomorrow"
+          }
+        ],
+        "follow_up": {
+          "zh": "48 小时内再次评估睡眠和夜间心率变化。",
+          "en": "Re-check sleep and nighttime heart rate changes within 48 hours."
+        }
+      }
+    },
+    "scenarios_page": {
+      "headline": {
+        "zh": "四类用户都能立即理解 AIHeal 的价值",
+        "en": "Four clear scenarios where AIHeal proves its value"
+      },
+      "description": {
+        "zh": "场景表达不讲抽象技术，而是直接回应用户最关心的问题。",
+        "en": "These scenarios avoid abstract technology claims and speak directly to what users want solved."
+      },
+      "items": [
+        {
+          "title": {
+            "zh": "打工人",
+            "en": "Office workers"
+          },
+          "problem": {
+            "zh": "长期疲惫、睡眠差，但不知道原因来自压力、作息还是恢复不足。",
+            "en": "They feel tired and sleep poorly, but do not know whether stress, routine, or recovery is the problem."
+          },
+          "outcome": {
+            "zh": "AI 自动分析最近变化，帮助用户尽快找出高影响因素。",
+            "en": "AI analyzes recent changes and helps surface the highest-impact factor quickly."
+          }
+        },
+        {
+          "title": {
+            "zh": "家庭健康",
+            "en": "Family health"
+          },
+          "problem": {
+            "zh": "父母状态在慢慢变化，家人往往要等到明显不适才发现。",
+            "en": "Family members often notice changes in parents only after discomfort becomes obvious."
+          },
+          "outcome": {
+            "zh": "AIHeal 会标记异常变化并提醒该关注什么。",
+            "en": "AIHeal flags unusual changes and tells families what deserves attention."
+          }
+        },
+        {
+          "title": {
+            "zh": "健身用户",
+            "en": "Fitness users"
+          },
+          "problem": {
+            "zh": "训练量上去了，但恢复跟不上，效果开始波动。",
+            "en": "Training load increases while recovery lags, making results inconsistent."
+          },
+          "outcome": {
+            "zh": "结合活动、睡眠和恢复信号优化训练节奏。",
+            "en": "Use activity, sleep, and recovery signals together to tune training rhythm."
+          }
+        },
+        {
+          "title": {
+            "zh": "慢性问题管理",
+            "en": "Chronic condition management"
+          },
+          "problem": {
+            "zh": "日常数据很多，但很难知道什么时候正在变差。",
+            "en": "There is plenty of daily data, but it is hard to tell when things are trending worse."
+          },
+          "outcome": {
+            "zh": "通过趋势追踪和风险提示，让用户更早看见变化。",
+            "en": "Trend tracking and risk alerts help users spot changes earlier."
+          }
+        }
+      ]
+    },
+    "technology_page": {
+      "headline": {
+        "zh": "在用户看到价值之后，再解释底层技术",
+        "en": "Explain the technology only after users see the value"
+      },
+      "description": {
+        "zh": "AIHeal 的技术不是炫技，而是为了让健康分析更可信、更可控。",
+        "en": "AIHeal's technology is not there for show. It exists to make health analysis more trustworthy and more controllable."
+      },
+      "sections": [
+        {
+          "title": {
+            "zh": "数据主权",
+            "en": "Data ownership"
+          },
+          "body": {
+            "zh": "用户始终知道数据来自哪里、如何被使用，以及如何导出或删除。",
+            "en": "Users always know where data comes from, how it is used, and how to export or delete it."
+          }
+        },
+        {
+          "title": {
+            "zh": "隐私保护",
+            "en": "Privacy protection"
+          },
+          "body": {
+            "zh": "以最小必要原则处理健康数据，把个人控制权放在第一位。",
+            "en": "Health data is handled with a minimum-necessary principle, keeping personal control first."
+          }
+        },
+        {
+          "title": {
+            "zh": "AI 模型",
+            "en": "AI model"
+          },
+          "body": {
+            "zh": "模型负责解释多源信号、检测模式并输出清晰建议，而不是只给术语。",
+            "en": "The model interprets multi-source signals, detects patterns, and produces clear recommendations instead of jargon."
+          }
+        },
+        {
+          "title": {
+            "zh": "去中心化",
+            "en": "Decentralization"
+          },
+          "body": {
+            "zh": "在合适的场景下，架构支持更灵活的个人健康数据管理方式。",
+            "en": "Where it fits, the architecture supports more flexible ways to manage personal health data."
+          }
+        }
+      ],
+      "note": {
+        "zh": "先让用户相信你能帮助他，再谈技术愿景。",
+        "en": "First prove that you can help the user, then talk about the broader technical vision."
+      }
+    },
+    "download_page": {
+      "headline": {
+        "zh": "下载 App，开始你的第一次健康分析",
+        "en": "Download the app and start your first health analysis"
+      },
+      "description": {
+        "zh": "下载页的目标只有一个：降低阻力，让用户尽快拿到第一个结果。",
+        "en": "The download page has one job: reduce friction and get the user to a first result quickly."
+      },
+      "platforms": [
+        {
+          "title": {
+            "zh": "iOS",
+            "en": "iOS"
+          },
+          "body": {
+            "zh": "连接 Apple Health 后即可自动同步核心健康数据。",
+            "en": "Connect Apple Health and sync core health signals automatically."
+          }
+        },
+        {
+          "title": {
+            "zh": "Android",
+            "en": "Android"
+          },
+          "body": {
+            "zh": "接入穿戴设备与手动记录，快速开始趋势分析。",
+            "en": "Bring in wearable data and manual logs to start trend analysis quickly."
+          }
+        }
+      ],
+      "qr": {
+        "title": {
+          "zh": "扫码下载",
+          "en": "Scan to download"
+        },
+        "body": {
+          "zh": "示意链接：aiheal.app/download",
+          "en": "Example link: aiheal.app/download"
+        },
+        "link": "aiheal.app/download"
+      },
+      "onboarding": [
+        {
+          "zh": "无需登录也能先看 Demo",
+          "en": "View the demo before creating an account"
+        },
+        {
+          "zh": "不填复杂信息即可开始",
+          "en": "Start without filling a long intake form"
+        },
+        {
+          "zh": "首次使用就给出健康评分",
+          "en": "Deliver a health score on the first session"
+        },
+        {
+          "zh": "让用户几乎不需要等待",
+          "en": "Keep waiting time close to zero"
+        }
+      ]
+    },
+    "developers_page": {
+      "headline": {
+        "zh": "给开发者的 API、Agent 与 SDK 入口",
+        "en": "API, agent, and SDK entry points for developers"
+      },
+      "description": {
+        "zh": "AIHeal 也可以作为健康分析能力层，被接入到你自己的产品或工作流中。",
+        "en": "AIHeal can also act as a health analysis capability layer inside your own product or workflow."
+      },
+      "cards": [
+        {
+          "title": {
+            "zh": "API",
+            "en": "API"
+          },
+          "body": {
+            "zh": "上传或同步健康信号，返回结构化健康评分、发现、风险和行动建议。",
+            "en": "Send health signals and receive structured scores, findings, risks, and action recommendations."
+          }
+        },
+        {
+          "title": {
+            "zh": "Agent",
+            "en": "Agent"
+          },
+          "body": {
+            "zh": "把健康分析接入对话式 Agent，让建议可以持续追踪与解释。",
+            "en": "Plug the analysis into conversational agents so insights can be followed up and explained over time."
+          }
+        },
+        {
+          "title": {
+            "zh": "SDK",
+            "en": "SDK"
+          },
+          "body": {
+            "zh": "在移动端或 Web 端快速嵌入健康快照、趋势卡片和报告模块。",
+            "en": "Embed health snapshots, trend cards, and report modules quickly on mobile or web surfaces."
+          }
+        }
+      ],
+      "api_snippet": "POST /v1/reports\n{\n  \"user_id\": \"demo-user\",\n  \"signals\": [\"sleep\", \"heart_rate\", \"activity\"]\n}",
+      "sdk_snippet": "const report = await aiheal.reports.generate({\n  userId: \"demo-user\",\n  includeTrend: true,\n});",
+      "internal_console": {
+        "title": {
+          "zh": "内部分析控制台",
+          "en": "Internal analytics console"
+        },
+        "body": {
+          "zh": "原有的 Selection Radar 分析看板仍然保留，可单独启动。",
+          "en": "The original Selection Radar analytics dashboard is still preserved and can be launched separately."
+        },
+        "command": "streamlit run selection_radar/analytics_dashboard.py --server.port 8501 --server.headless true"
+      }
+    },
+    "conversion_funnel": {
+      "path": [
+        {
+          "zh": "首页",
+          "en": "Home"
+        },
+        {
+          "zh": "查看报告 Demo",
+          "en": "View demo report"
+        },
+        {
+          "zh": "点击体验",
+          "en": "Try it"
+        },
+        {
+          "zh": "下载 App",
+          "en": "Download app"
+        },
+        {
+          "zh": "首次分析",
+          "en": "First analysis"
+        },
+        {
+          "zh": "留存",
+          "en": "Retention"
+        }
+      ],
+      "steps": [
+        {
+          "stage": {
+            "zh": "首页",
+            "en": "Home"
+          },
+          "goal": {
+            "zh": "让用户看懂",
+            "en": "Help users understand fast"
+          }
+        },
+        {
+          "stage": {
+            "zh": "Demo",
+            "en": "Demo"
+          },
+          "goal": {
+            "zh": "让用户相信",
+            "en": "Build trust"
+          }
+        },
+        {
+          "stage": {
+            "zh": "下载",
+            "en": "Download"
+          },
+          "goal": {
+            "zh": "降低阻力",
+            "en": "Reduce friction"
+          }
+        },
+        {
+          "stage": {
+            "zh": "首次使用",
+            "en": "First session"
+          },
+          "goal": {
+            "zh": "必须给结果",
+            "en": "Deliver a result immediately"
+          }
+        }
+      ],
+      "experience_principles": [
+        {
+          "zh": "不登录也能看 Demo",
+          "en": "See the demo without signing in"
+        },
+        {
+          "zh": "不填信息",
+          "en": "Do not force a form first"
+        },
+        {
+          "zh": "立刻生成评分",
+          "en": "Generate a score right away"
+        },
+        {
+          "zh": "不要让用户等",
+          "en": "Do not make users wait"
+        }
+      ]
+    },
+    "demo_report_template": {
+      "health_score": {
+        "score": 82,
+        "status": {
+          "zh": "良好",
+          "en": "Good"
+        }
+      },
+      "findings": [
+        {
+          "zh": "睡眠质量下降",
+          "en": "Sleep quality has declined"
+        },
+        {
+          "zh": "心率波动异常",
+          "en": "Heart rate variability is outside its usual range"
+        }
+      ],
+      "risk": {
+        "zh": "近期可能存在疲劳累积风险",
+        "en": "There may be a near-term risk of accumulated fatigue"
+      },
+      "analysis": {
+        "zh": "你的睡眠时长减少，同时夜间心率偏高，可能与压力或作息不规律有关。",
+        "en": "Your sleep duration is shorter while nighttime heart rate is elevated, which may be linked to stress or an irregular routine."
+      },
+      "actions": [
+        {
+          "zh": "提前 30 分钟入睡",
+          "en": "Go to bed 30 minutes earlier"
+        },
+        {
+          "zh": "减少晚间蓝光",
+          "en": "Reduce blue light exposure at night"
+        },
+        {
+          "zh": "增加轻度运动",
+          "en": "Add light movement during the day"
+        }
+      ]
+    },
+    "core_principles": [
+      {
+        "zh": "用户最关心的是：你能帮我什么",
+        "en": "The core user question is simple: how do you help me"
+      },
+      {
+        "zh": "不要一上来讲去中心化或数据主权",
+        "en": "Do not lead with decentralization or data ownership"
+      },
+      {
+        "zh": "页面顺序必须是：功能 -> 结果 -> 信任 -> 愿景",
+        "en": "The page order should be: features -> outcome -> trust -> vision"
+      }
+    ]
+  }
+}
