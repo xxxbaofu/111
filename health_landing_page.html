@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 健康管家</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #22c55e;
+      --secondary-line: #cbd5f5;
+      --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+      --shadow-health-card: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --radius-lg: 24px;
+      --radius-md: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1200px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    /* Section 组件 */
+    .section {
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-section {
+      height: 720px;
+      background:
+        radial-gradient(circle at right top, rgba(34, 197, 94, 0.14), transparent 48%),
+        linear-gradient(180deg, #f8fffb 0%, #f8fafc 80%);
+    }
+
+    .feature-section {
+      height: 420px;
+      padding: 40px 0;
+    }
+
+    .demo-section {
+      height: 600px;
+      background: #f1f5f9;
+      padding: 56px 0;
+    }
+
+    .hero-grid,
+    .demo-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .hero-title {
+      margin: 0 0 20px;
+      font-size: 48px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-subtitle {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: #1e293b;
+    }
+
+    .hero-description {
+      margin: 0 0 32px;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Button 组件 */
+    .btn {
+      border-radius: 14px;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 148px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 10px 20px rgba(34, 197, 94, 0.25);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: #334155;
+      border-color: var(--secondary-line);
+    }
+
+    /* Card 组件 */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .health-card {
+      width: 320px;
+      height: 520px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-health-card);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      justify-content: flex-start;
+    }
+
+    .health-card-label {
+      color: #475569;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .health-score {
+      margin: 0;
+      font-size: 86px;
+      font-weight: 700;
+      line-height: 1;
+      color: #16a34a;
+    }
+
+    .status-list {
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: #334155;
+      font-size: 17px;
+    }
+
+    .status-list strong {
+      color: #0f172a;
+      min-width: 58px;
+      display: inline-block;
+    }
+
+    .analysis-box {
+      margin-top: auto;
+      border: 1px solid #dcfce7;
+      background: #f0fdf4;
+      border-radius: 14px;
+      padding: 14px 14px 16px;
+    }
+
+    .analysis-box-title {
+      margin: 0 0 6px;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .analysis-box p {
+      margin: 0;
+      color: #14532d;
+      font-size: 15px;
+    }
+
+    .feature-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 360px);
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .feature-card {
+      width: 360px;
+      height: 240px;
+      border-radius: var(--radius-md);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid #eef2f7;
+    }
+
+    .feature-card h3 {
+      margin: 0 0 12px;
+      font-size: 26px;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .section-heading {
+      margin: 0 0 10px;
+      font-size: 40px;
+      line-height: 1.2;
+    }
+
+    .section-copy {
+      margin: 0;
+      color: #475569;
+      font-size: 17px;
+    }
+
+    .report-card {
+      width: 420px;
+      border-radius: var(--radius-md);
+      padding: 28px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .report-score {
+      margin: 0 0 16px;
+      font-size: 30px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .alert-list {
+      margin: 0 0 20px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      color: #b45309;
+      font-weight: 600;
+    }
+
+    .report-label {
+      margin: 0 0 6px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .report-copy {
+      margin: 0 0 14px;
+      color: #334155;
+    }
+
+    .advice-list {
+      margin: 0;
+      padding-left: 20px;
+      color: #334155;
+      display: grid;
+      gap: 4px;
+    }
+
+    .usage-section,
+    .data-section,
+    .cta-section {
+      padding: 88px 0;
+    }
+
+    .usage-title,
+    .data-title {
+      margin: 0 0 28px;
+      font-size: 32px;
+      text-align: center;
+    }
+
+    .usage-grid {
+      display: grid;
+      gap: 22px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .usage-card {
+      padding: 24px;
+      border: 1px solid #e8eef5;
+      border-radius: 18px;
+      background: #ffffff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .usage-icon {
+      font-size: 30px;
+      margin-bottom: 12px;
+    }
+
+    .usage-card h4 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .usage-card p {
+      margin: 0;
+      color: #64748b;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+    }
+
+    /* Tag 组件 */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid #d1fae5;
+      background: #ecfdf5;
+      color: #166534;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .cta-panel {
+      border-radius: 28px;
+      background: linear-gradient(120deg, #dcfce7 0%, #ecfeff 100%);
+      border: 1px solid #bbf7d0;
+      padding: 56px 42px;
+      text-align: center;
+    }
+
+    .cta-panel h2 {
+      margin: 0 0 18px;
+      font-size: 36px;
+    }
+
+    .cta-panel .button-row {
+      justify-content: center;
+    }
+
+    footer {
+      background: #0b1220;
+      color: #cbd5e1;
+      padding: 64px 0 22px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .footer-col h4 {
+      margin: 0 0 10px;
+      color: #f8fafc;
+      font-size: 17px;
+    }
+
+    .footer-col ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .footer-col li {
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .footer-bottom {
+      margin-top: 30px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(203, 213, 225, 0.2);
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    @media (max-width: 1200px) {
+      .feature-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .feature-card {
+        width: auto;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .hero-section,
+      .feature-section,
+      .demo-section {
+        height: auto;
+      }
+
+      .hero-grid,
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .health-card,
+      .report-card {
+        width: 100%;
+      }
+
+      .feature-grid,
+      .usage-grid,
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="section hero-section">
+      <div class="container hero-grid">
+        <div>
+          <h1 class="hero-title">AI 健康管家</h1>
+          <p class="hero-subtitle">用数据理解你的身体，而不是猜</p>
+          <p class="hero-description">自动分析健康状态 · 发现风险 · 生成行动建议</p>
+          <div class="button-row">
+            <a class="btn btn-primary" href="#cta">立即体验</a>
+            <a class="btn btn-secondary" href="#demo">查看示例报告</a>
+          </div>
+        </div>
+
+        <article class="card health-card" aria-label="健康卡片组件">
+          <p class="health-card-label">Health Score</p>
+          <p class="health-score">88</p>
+          <ul class="status-list">
+            <li><strong>心率：</strong>正常</li>
+            <li><strong>睡眠：</strong>偏低</li>
+            <li><strong>情绪：</strong>稳定</li>
+          </ul>
+          <div class="analysis-box">
+            <p class="analysis-box-title">[ AI分析 ]</p>
+            <p>你的睡眠时长下降，建议调整作息</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section feature-section">
+      <div class="container feature-grid">
+        <article class="card feature-card">
+          <h3>健康评分</h3>
+          <p>实时了解身体状态</p>
+        </article>
+        <article class="card feature-card">
+          <h3>趋势分析</h3>
+          <p>追踪健康变化</p>
+        </article>
+        <article class="card feature-card">
+          <h3>AI报告</h3>
+          <p>发现问题并给建议</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section demo-section" id="demo">
+      <div class="container demo-grid">
+        <div>
+          <h2 class="section-heading">一份属于你的健康报告</h2>
+          <p class="section-copy">AI自动分析你的数据并给出建议</p>
+        </div>
+
+        <article class="card report-card" aria-label="Demo 报告卡">
+          <p class="report-score">健康评分：82</p>
+          <ul class="alert-list">
+            <li>⚠️ 睡眠下降</li>
+            <li>⚠️ 心率波动</li>
+          </ul>
+          <p class="report-label">AI分析：</p>
+          <p class="report-copy">近期压力偏高</p>
+          <p class="report-label">建议：</p>
+          <ul class="advice-list">
+            <li>提前入睡</li>
+            <li>减少蓝光</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="usage-section">
+      <div class="container">
+        <h2 class="usage-title">使用场景</h2>
+        <div class="usage-grid">
+          <article class="usage-card">
+            <div class="usage-icon">👨‍💻</div>
+            <h4>打工人</h4>
+            <p>识别加班和压力带来的睡眠与心率波动。</p>
+          </article>
+          <article class="usage-card">
+            <div class="usage-icon">👨‍👩‍👧</div>
+            <h4>家庭</h4>
+            <p>为家人建立长期健康档案，及时发现风险。</p>
+          </article>
+          <article class="usage-card">
+            <div class="usage-icon">🏋️</div>
+            <h4>健身</h4>
+            <p>结合训练计划查看恢复质量，优化训练节奏。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="data-section">
+      <div class="container">
+        <h2 class="data-title">数据来源</h2>
+        <div class="tag-list">
+          <span class="tag">Apple健康</span>
+          <span class="tag">华为健康</span>
+          <span class="tag">小米</span>
+          <span class="tag">体检报告</span>
+          <span class="tag">手动输入</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section" id="cta">
+      <div class="container">
+        <div class="cta-panel">
+          <h2>开始你的健康分析</h2>
+          <div class="button-row">
+            <a class="btn btn-primary" href="#">下载APP</a>
+            <a class="btn btn-secondary" href="#">扫码体验</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>产品</h4>
+          <ul>
+            <li>功能</li>
+            <li>报告示例</li>
+            <li>下载</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>支持</h4>
+          <ul>
+            <li>使用场景</li>
+            <li>联系我们</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>隐私与安全</h4>
+          <ul>
+            <li>隐私政策</li>
+            <li>免责声明</li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>开发者</h4>
+          <ul>
+            <li>API（未来）</li>
+            <li>SDK（未来）</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">© 2026 一亩草 ｜ ICP备案号</div>
+    </div>
+  </footer>
+</body>
+</html>
